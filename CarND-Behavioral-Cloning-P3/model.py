@@ -52,7 +52,7 @@ train_samples, validation_samples = train_test_split(samples, test_size=0.2, shu
 print('Training samples: ', len(train_samples))
 print('Validation samples: ', len(validation_samples))
 
-def generator(samples, batch_size=32):
+def generator(samples, batch_size=24):
     while True:
         shuffle(samples)
         for offset in range(0, len(samples), batch_size):
@@ -62,8 +62,8 @@ def generator(samples, batch_size=32):
                 #image = np.asarray(Image.open(line[0]))
                 image = np.asarray(Image.open(data_folder + batch_sample[0]))
                 angle = float(batch_sample[3])
-                images.append(image)
-                angles.append(angle)
+                images.extend([image, np.fliplr(image)])
+                angles.extend([angle, -angle])
             X_train = np.array(images)
             y_train = np.array(angles)
             yield shuffle(X_train, y_train)
@@ -110,9 +110,9 @@ model.add(Convolution2D(64, 3, 3))
 model.add(Activation('relu'))
 model.add(Flatten())
 model.add(Dense(100))
-#model.add(Dropout(0.5))
+model.add(Dropout(0.5))
 model.add(Dense(50))
-#model.add(Dropout(0.5))
+model.add(Dropout(0.5))
 model.add(Dense(10))
 #model.add(Dropout(0.5))
 model.add(Dense(1))
@@ -121,8 +121,8 @@ model.compile(loss='mse', optimizer='adam')
 ##### Train the network #####
 
 #history_object = model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=3, verbose=2)
-history_object = model.fit_generator(train_generator, samples_per_epoch=len(train_samples),
-    validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3, verbose=2)
+history_object = model.fit_generator(train_generator, samples_per_epoch=2*len(train_samples),
+    validation_data=validation_generator, nb_val_samples=2*len(validation_samples), nb_epoch=5, verbose=2)
 
 #print(history_object.history.keys())
 #plt.plot(history_object.history['loss'])
