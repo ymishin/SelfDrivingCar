@@ -15,7 +15,7 @@ The project includes the following files:
 * `drive.py` for driving the car in autonomous mode using simulator
 * `video.mp4` is a video of autonomous driving with a trained CNN
 
-The `model.py` contains the code for training and saving the convolution neural network. The trained CNN is saved in model.h5.
+The `model.py` contains the code for training and saving the convolution neural network. The trained CNN is saved in `model.h5`.
 
 Using Udacity simulator, the car can be driven autonomously around the track with a help of trained CNN by executing:
 ```sh
@@ -53,4 +53,4 @@ Adam optimizer is used, so the learning rate was not tuned manually.
 Model was trained for 3 epochs. Here are training and validation losses:
 <img src="./loss.png" width="400">
 
-The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track. The recorded video is provided in video.mp4.
+The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track. The recorded video is provided in `video.mp4`.
