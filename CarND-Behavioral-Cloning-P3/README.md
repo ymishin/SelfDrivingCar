@@ -44,7 +44,7 @@ Data collection was performed by carefully driving around the track one lap forw
 
 The total amount of images was 42162. The data was shuffled and splitted (80% for training, 20% for validation).
 
-Due to substantial amount of data, generators for training and validation data sets are constructed and used.
+Due to substantial amount of data, generators for training and validation data sets were constructed and used.
 
 #### Model Training
 
