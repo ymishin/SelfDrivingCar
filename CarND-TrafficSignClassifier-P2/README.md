@@ -28,7 +28,7 @@ Here are distributions of labels in training, validation and testing sets:
 
 Some random image samples from training set:
 
-<img src="./images/random_signs.jpg.jpg">
+<img src="./images/random_signs.jpg">
 
 ### 2. Model Architecture Design and Testing.
 
