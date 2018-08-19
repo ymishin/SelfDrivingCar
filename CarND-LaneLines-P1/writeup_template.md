@@ -8,7 +8,7 @@
 
 ### 1. Pipeline description.
 
-The pipeline is implemented in process_image() function and consists of the following steps:
+The pipeline is implemented in `process_image()` function and consists of the following steps:
 1. Grayscale transform.
 2. Gaussian smoothing.
 3. Canny edge detection.
@@ -16,13 +16,39 @@ The pipeline is implemented in process_image() function and consists of the foll
 5. Hough transform to detect possible lane lines.
 6. Detect and draw lane lines from the results of Hough transform.
 
-Step 6 above is implemented in draw_lines() function and consists of the following sub-steps:
+Step 6 above is implemented in `draw_lines()` function and consists of the following sub-steps:
 1. Sort lines detected by Hough transform to 2 lists (left and right) depending on an angle.
 2. Fit 1st order polynomials for these left and right lists of lines.
 3. Construct left and right lane lines from these fits.
 4. Draw detected lane lines.
 
-<img src="./test_images_input/solidWhiteCurve.jpg" width="280">
+Here are the test images with detected lane lines:
+<p float="left">
+<img src="./test_images_input/solidWhiteCurve.jpg" width="300">
+<img src="./test_images_output/solidWhiteCurve.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/solidWhiteRight.jpg" width="300">
+<img src="./test_images_output/solidWhiteRight.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/solidYellowCurve.jpg" width="300">
+<img src="./test_images_output/solidYellowCurve.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/solidYellowCurve2.jpg" width="300">
+<img src="./test_images_output/solidYellowCurve2.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/solidYellowLeft.jpg" width="300">
+<img src="./test_images_output/solidYellowLeft.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/whiteCarLaneSwitch.jpg" width="300">
+<img src="./test_images_output/whiteCarLaneSwitch.jpg" width="300">
+</p>
+
+Test videos with detected lane lines are located in **test_videos_output** folder.
 
 ### 2. Potential shortcomings and possible improvements with the current pipeline
 
