@@ -1,47 +1,57 @@
 # **Finding Lane Lines on the Road** 
 
-## Writeup Template
+---
 
-### You can use this file as a template for your writeup if you want to submit it as a markdown file. But feel free to use some other method and submit a pdf if you prefer.
+**The goal of this project is to make a pipeline that finds lane lines on the road**
 
 ---
 
-**Finding Lane Lines on the Road**
+### 1. Pipeline description.
 
-The goals / steps of this project are the following:
-* Make a pipeline that finds lane lines on the road
-* Reflect on your work in a written report
+The pipeline is implemented in `process_image()` function and consists of the following steps:
+1. Grayscale transform.
+2. Gaussian smoothing.
+3. Canny edge detection.
+4. Image masking (mask region with a road).
+5. Hough transform to detect possible lane lines.
+6. Detect and draw lane lines from the results of Hough transform.
 
+Step 6 above is implemented in `draw_lines()` function and consists of the following sub-steps:
+1. Sort lines detected by Hough transform to 2 lists (left and right) depending on an angle.
+2. Fit 1st order polynomials for these left and right lists of lines.
+3. Construct left and right lane lines from these fits.
+4. Draw detected lane lines.
 
-[//]: # (Image References)
+Here are the test images with detected lane lines:
+<p float="left">
+<img src="./test_images_input/solidWhiteCurve.jpg" width="300">
+<img src="./test_images_output/solidWhiteCurve.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/solidWhiteRight.jpg" width="300">
+<img src="./test_images_output/solidWhiteRight.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/solidYellowCurve.jpg" width="300">
+<img src="./test_images_output/solidYellowCurve.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/solidYellowCurve2.jpg" width="300">
+<img src="./test_images_output/solidYellowCurve2.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/solidYellowLeft.jpg" width="300">
+<img src="./test_images_output/solidYellowLeft.jpg" width="300">
+</p>
+<p float="left">
+<img src="./test_images_input/whiteCarLaneSwitch.jpg" width="300">
+<img src="./test_images_output/whiteCarLaneSwitch.jpg" width="300">
+</p>
 
-[image1]: ./examples/grayscale.jpg "Grayscale"
+Test videos with detected lane lines are located in **test_videos_output** folder.
 
----
+### 2. Potential shortcomings and possible improvements with the current pipeline
 
-### Reflection
-
-### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
-
-My pipeline consisted of 5 steps. First, I converted the images to grayscale, then I .... 
-
-In order to draw a single line on the left and right lanes, I modified the draw_lines() function by ...
-
-If you'd like to include images to show how the pipeline works, here is how to include an image: 
-
-![alt text][image1]
-
-
-### 2. Identify potential shortcomings with your current pipeline
-
-
-One potential shortcoming would be what would happen when ... 
-
-Another shortcoming could be ...
-
-
-### 3. Suggest possible improvements to your pipeline
-
-A possible improvement would be to ...
-
-Another potential improvement could be to ...
+There are few shortcomings with the currect approach:
+1. Detected lane lines are always straight, which is obviously wrong when road turns left or right. These could be probably improved by fitting higher order polynomials in step 6 of the pipeline.
+2. Depeding on quality of an individual image, detected lane lines could be altered by image artifacts of noise. These however could be improved when image processing is done continously (i.e. video stream) by applying some filtering based on previos frames.
