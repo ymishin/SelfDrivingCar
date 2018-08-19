@@ -30,7 +30,7 @@ Video example of autonomous driving is provided by `video.mp4`.
 
 The initial network architecture was similar to LeNet-5. Different shapes of layers were evaluated and different data collection strategies were tried, but it was not possible to obtain a trained CNN which could perform successfully in the simulator, i.e. vehicle didn't stay on track.
 
-After some investigation, the network proposed by Nvidia ([arXiv:1604.07316v1](https://arxiv.org/abs/1604.07316v1)) implemented. The network consists of 5 convolution and 5 activation layers, followed by 3 fully connected layers. In addition, two dropout layers were added to help with possible overfitting problems. The network also contains 3 layers to crop, resize and normalize the data. This network was successfully trained and run in the simulator.
+After some investigation, the network proposed by Nvidia ([arXiv:1604.07316v1](https://arxiv.org/abs/1604.07316v1)) was implemented. The network consists of 5 convolution and 5 activation layers, followed by 3 fully connected layers. In addition, two dropout layers were added to help with possible overfitting problems. The network also contains 3 layers to crop, resize and normalize the data. This network was successfully trained and run in the simulator.
 
 #### Data Collection Strategy
 
