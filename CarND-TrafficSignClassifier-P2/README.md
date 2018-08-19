@@ -73,7 +73,7 @@ Results of training and evaluation are:
 
 #### Some notes about the choosen model architecture and hyperparameters.
 
-The initial model architecture was equivalent to LeNet-5 with last fully connected layer changed to predict 43 classes. Different values of hyperparameters were evaluated (batch size, number of epochs and learning rate) but it was not possible to attain desired validation set accuracy. Thus the model was substantially increased. The final model contains 2 convolution and 3 fully connected layers as LeNet-5, but all layers are larger. Besides, two dropout layers were added to help with possible overfitting problems.
+The initial model architecture was equivalent to LeNet-5, except output layer was changed to predict 43 classes. Different values of hyperparameters were evaluated (batch size, number of epochs and learning rate) but it was not possible to attain desired validation set accuracy. Thus the model was substantially increased. The final model contains 2 convolution and 3 fully connected layers as LeNet-5, but all layers are larger. Besides, two dropout layers were added to help with possible overfitting problems.
 
 ### 3. Model Testing on New Images.
 
