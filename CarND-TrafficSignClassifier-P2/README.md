@@ -77,46 +77,28 @@ The initial model architecture was equivalent to LeNet-5, except output layer wa
 
 ### 3. Model Testing on New Images.
 
-#### 1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
+#### 5 random traffic signs from the web.
 
-Here are five German traffic signs that I found on the web:
+<p float="left">
+<img src="./data/slippery_road.jpg" width="64">
+<img src="./data/80_kmh.jpg" width="64">
+<img src="./data/120_kmh.jpg" width="64">
+<img src="./data/stop.jpg" width="64">
+<img src="./data/road_work.jpg" width="64">
+</p>
 
-![alt text][image4] ![alt text][image5] ![alt text][image6] 
-![alt text][image7] ![alt text][image8]
+All these images should be relatively easy to classify. "80 km/h" sign could be a little problematic as it is rotated a little bit.
 
-The first image might be difficult to classify because ...
+#### CNN classification of new traffic signs images.
 
-#### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set.
+All images were correctly classified with surpsingly high accuracy. Here are classification probablities:
 
-Here are the results of the prediction:
+| Image			        | Classification probability  | 
+|:------------------|:----------------------------| 
+| Slippery road     | 0.99   		    							| 
+| 80 km/h      			| 0.98       								  |
+| 120 km/h  				| 1.00                        |
+| Stop          		| 0.99                        |
+| Road work    			| 0.96          							|
 
-| Image			        |     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
-
-
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
-
-#### 3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
-
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
-
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
-
-| Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
-
-
-For the second image ... 
-
-
-
+This gives model accuracy of 100% on this data set.
