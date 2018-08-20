@@ -88,3 +88,7 @@ After that `draw_labeled_bboxes()` is called which draws bounding boxes for dete
 #### Some notes about pipeline for video processing
 
 For video processing additional step is performed. All detected bounding boxes are stored in a `history` object in a buffer with a specified size. This buffer is updated for each frame, and heat map is produced taking into accoutn content of this buffer. This helps with vehicle tracking and filtering of false positives.
+
+### 5. Potential shortcomings and possible improvements with the current pipeline
+
+The implemented vehicle detection pipeline works, but its performance is not always satisfactory. This is probably mainly due to relatively small data set used to train classifier. Another possible problem with the current pipeline could be vehicle detection in different light conditions (i.e. night / day). This probably could be improved by playing with color space or by using different pre-trained classifiers for different light conditions and choose the appropriate one.
