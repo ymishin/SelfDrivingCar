@@ -118,11 +118,16 @@ Finallly, processed image is warped back to the original image space using persp
 <img src="./output_images/lanelines_test3.jpg" width="250">
 </p>  
 
-### 2. Lane lines detection pipeline (video)
+### 3. Lane lines detection pipeline (video)
 
 Lane lines detection pipeline for video stream is implemented in `process_video_frame()` function and is similar to the pipelie for individual images described above. 
 
 The example video with detected lane lines is provided by `project_video_with_lines.mp4`
+
+### 4. Potential shortcomings and possible improvements with the current pipeline
+
+The possible problem with the current pipeline could be lane lines detection in different or difficult light conditions. This probably could be solved by changing the way how thresholded binary mask is contructed. Probably this better should be done by using some 
+some adaptive algorithms which choose appropriate color channels and other filters depeding on actual light conditions.
 
 ### Discussion
 
