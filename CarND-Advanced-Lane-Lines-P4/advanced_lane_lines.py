@@ -7,6 +7,8 @@ from moviepy.editor import VideoFileClip
 
 ############################################################################################################
 
+# Camera calibration
+
 def calibrate():
     # prepare object points
     objp = np.zeros((6 * 9, 3), np.float32)
@@ -40,6 +42,15 @@ def calibrate():
 
     # cv2.destroyAllWindows()
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, img.shape[1::-1], None, None)
+
+    images = glob.glob('./camera_cal/calibration*.jpg')
+    for fname in images:
+        img = cv2.imread(fname)
+        img_undist = cv2.undistort(img, mtx, dist, None, mtx)
+        plt.imshow(img_undist)
+        head, tail = os.path.split(fname)
+        plt.savefig('./output_images/' + 'undistorted_' + tail)
+
     return mtx, dist
 
 mtx, dist = calibrate()
@@ -103,7 +114,7 @@ def r_threshold(img, thresh=(0, 255)):
 def find_lane_pixels(binary_warped):
     # Take a histogram of the bottom half of the image
     histogram = np.sum(binary_warped[binary_warped.shape[0] // 2:, :], axis=0)
-    # Create an output image to draw on and visualize the result
+    # Create an output image to draw on
     out_img = np.dstack((binary_warped, binary_warped, binary_warped)) * 200
     # Find the peak of the left and right halves of the histogram
     # These will be the starting point for the left and right lines
@@ -111,7 +122,6 @@ def find_lane_pixels(binary_warped):
     leftx_base = np.argmax(histogram[:midpoint])
     rightx_base = np.argmax(histogram[midpoint:]) + midpoint
 
-    # HYPERPARAMETERS
     # Choose the number of sliding windows
     nwindows = 9
     # Set the width of the windows +/- margin
@@ -181,14 +191,65 @@ def find_lane_pixels(binary_warped):
 
     return leftx, lefty, rightx, righty, out_img
 
-def find_lanes_and_fit_polynomials(binary_warped, output_mode=1):
+############################################################################################################
 
-    # Find our lane pixels first
+def measure_curvature_pixels(binary_warped, lefty, leftx, righty, rightx):
+    '''
+    Calculates the curvature of polynomial functions in pixels.
+    '''
+    # Define y-value where we want radius of curvature
+    # We'll choose the maximum y-value, corresponding to the bottom of the image
+    y_eval = binary_warped.shape[0]
+
+    # Define conversions in x and y from pixels space to meters
+    margin = 100
+    ym_per_pix = 30.0 / (binary_warped.shape[0] - 2 * margin) # meters per pixel in y dimension
+    xm_per_pix = 3.7 / (binary_warped.shape[1] - 2 * margin) # meters per pixel in x dimension
+
+    left_fit_cr = np.polyfit(lefty * ym_per_pix, leftx * xm_per_pix, 2)
+    right_fit_cr = np.polyfit(righty * ym_per_pix, rightx * xm_per_pix, 2)
+
+    left_curverad = ((1 + (2 * left_fit_cr[0] * y_eval * ym_per_pix + left_fit_cr[1]) ** 2) ** 1.5) / np.absolute(2 * left_fit_cr[0])
+    right_curverad = ((1 + (2 * right_fit_cr[0] * y_eval * ym_per_pix + right_fit_cr[1]) ** 2) ** 1.5) / np.absolute(2 * right_fit_cr[0])
+
+    return left_curverad, right_curverad
+
+############################################################################################################
+
+def find_lanes_and_fit_polynomials(binary_warped, output_mode=1, history=None):
+
+    # Find lane pixels first
     leftx, lefty, rightx, righty, out_img = find_lane_pixels(binary_warped)
 
     # Fit a second order polynomial to each lane
     left_fit = np.polyfit(lefty, leftx, 2)
     right_fit = np.polyfit(righty, rightx, 2)
+
+    left_curverad, right_curverad = measure_curvature_pixels(binary_warped, lefty, leftx, righty, rightx)
+
+    if (history is not None):
+        max_diff = 2.5
+        if (history.left_curverad != 0 and (history.left_curverad / left_curverad > max_diff or left_curverad / history.left_curverad > max_diff)):
+            left_curverad = history.left_curverad
+            left_fit = history.left_fit
+        else:
+            history.left_curverad = left_curverad
+            history.left_fit = left_fit
+        if (history.right_curverad != 0 and (history.right_curverad / right_curverad > max_diff or right_curverad / history.right_curverad > max_diff)):
+            right_curverad = history.right_curverad
+            right_fit = history.right_fit
+        else:
+            history.right_curverad = right_curverad
+            history.right_fit = right_fit
+
+    # Offset
+    margin = 100
+    ym_per_pix = 30.0 / (binary_warped.shape[0] - 2 * margin)  # meters per pixel in y dimension
+    xm_per_pix = 3.7 / (binary_warped.shape[1] - 2 * margin)  # meters per pixel in x dimension
+    image_center = binary_warped.shape[1] / 2
+    y_eval = binary_warped.shape[0]
+    lane_center = ((left_fit[0] * y_eval ** 2 + left_fit[1] * y_eval + left_fit[2]) + (right_fit[0] * y_eval ** 2 + right_fit[1] * y_eval + right_fit[2])) / 2
+    offset = xm_per_pix * (image_center - lane_center)
 
     # Generate x and y values for plotting
     ploty = np.linspace(0, binary_warped.shape[0] - 1, binary_warped.shape[0])
@@ -202,7 +263,6 @@ def find_lanes_and_fit_polynomials(binary_warped, output_mode=1):
         right_fitx = 1 * ploty ** 2 + 1 * ploty
 
     if (output_mode == 1):
-        ## Visualization ##
         # Colors in the left and right lane regions
         out_img[lefty, leftx] = [255, 0, 0]
         out_img[righty, rightx] = [0, 0, 255]
@@ -226,13 +286,21 @@ def find_lanes_and_fit_polynomials(binary_warped, output_mode=1):
         # Draw the lane onto the warped blank image
         cv2.fillPoly(out_img, np.int_([pts]), (0, 255, 0))
 
-    return out_img
+    return out_img, left_curverad, right_curverad, offset
 
 ############################################################################################################
 
-def process_image(img):
+def process_image(fname):
+
+    img = cv2.imread(fname)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     img_undist = cv2.undistort(img, mtx, dist, None, mtx)
+
+    plt.figure()
+    plt.imshow(img_undist)
+    head, tail = os.path.split(fname)
+    plt.savefig('./output_images/' + 'undistorted_' + tail)
 
     # create thresholded binary image
     ksize = 3
@@ -242,31 +310,49 @@ def process_image(img):
     # dir_mask = dir_threshold(img_undist, sobel_kernel=ksize, thresh=(0.7, 1.3))
     r_mask = r_threshold(img_undist, thresh=(230, 255))
     s_mask = s_threshold(img_undist, thresh=(170, 255))
-
     combined = np.zeros_like(gradx_mask)
     combined[(s_mask == 1) | (r_mask == 1) | ((gradx_mask == 1) & (grady_mask == 1))] = 1
+
+    plt.figure()
+    plt.imshow(combined)
+    plt.savefig('./output_images/' + 'binary_' + tail)
 
     # gradxy_mask = np.zeros_like(gradx_mask)
     # gradxy_mask[((gradx_mask == 1) & (grady_mask == 1))] = 1
 
     # apply a perspective transform to rectify binary image ("birds-eye view")
     src_coord = np.float32([[700, 450], [1110, 660], [190, 660], [580, 450]])
-    offset = 100
+    margin = 100
     img_size = (img_undist.shape[1], img_undist.shape[0])
-    # offset = 0
-    # img_size = (300, 300)
-    dst_coord = np.float32([[img_size[0] - offset, offset], [img_size[0] - offset, img_size[1] - offset],
-                            [offset, img_size[1] - offset], [offset, offset]])
+    dst_coord = np.float32([[img_size[0] - margin, margin], [img_size[0] - margin, img_size[1] - margin],
+                            [margin, img_size[1] - margin], [margin, margin]])
     M = cv2.getPerspectiveTransform(src_coord, dst_coord)
-    # Minv = cv2.getPerspectiveTransform(dst_coord, src_coord)
+    Minv = cv2.getPerspectiveTransform(dst_coord, src_coord)
     combined = cv2.warpPerspective(combined, M, img_size, flags=cv2.INTER_LINEAR)
 
-    out_img = find_lanes_and_fit_polynomials(combined)
+    plt.figure()
+    plt.imshow(combined)
+    plt.savefig('./output_images/' + 'warped_' + tail)
+
+    plt.figure()
+    out_img, left_curverad, right_curverad, offset = find_lanes_and_fit_polynomials(combined, output_mode=1)
+    plt.savefig('./output_images/' + 'poly_' + tail)
+    print(tail, left_curverad, right_curverad, offset)
+
+    out_img, left_curverad, right_curverad, offset = find_lanes_and_fit_polynomials(combined, output_mode=2)
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    out_img = cv2.warpPerspective(out_img, Minv, (img.shape[1], img.shape[0]))
+    # Combine the result with the original image
+    out_img = cv2.addWeighted(img_undist, 1, out_img, 0.3, 0)
+    plt.figure()
+    plt.imshow(out_img)
+    plt.savefig('./output_images/' + 'lanelines_' + tail)
+
     return out_img
 
 ############################################################################################################
 
-def process_video_frame(img):
+def process_video_frame(img, history):
 
     img_undist = cv2.undistort(img, mtx, dist, None, mtx)
 
@@ -289,110 +375,51 @@ def process_video_frame(img):
     src_coord = np.float32([[700, 450], [1110, 660], [190, 660], [580, 450]])
     offset = 100
     img_size = (img_undist.shape[1], img_undist.shape[0])
-    # offset = 0
-    # img_size = (300, 300)
     dst_coord = np.float32([[img_size[0] - offset, offset], [img_size[0] - offset, img_size[1] - offset],
                             [offset, img_size[1] - offset], [offset, offset]])
     M = cv2.getPerspectiveTransform(src_coord, dst_coord)
     Minv = cv2.getPerspectiveTransform(dst_coord, src_coord)
     combined = cv2.warpPerspective(combined, M, img_size, flags=cv2.INTER_LINEAR)
 
-    out_img = find_lanes_and_fit_polynomials(combined, 2)
+    out_img, left_curverad, right_curverad, offset = find_lanes_and_fit_polynomials(combined, 2, history)
 
     # Warp the blank back to original image space using inverse perspective matrix (Minv)
     out_img = cv2.warpPerspective(out_img, Minv, (img.shape[1], img.shape[0]))
     # Combine the result with the original image
     out_img = cv2.addWeighted(img_undist, 1, out_img, 0.3, 0)
+    text = "left / right R: " + str(left_curverad) + " / " + str(right_curverad)
+    cv2.putText(out_img, text, (10, 50), cv2.FONT_HERSHEY_PLAIN, 2.0, (255, 255, 255), 3)
+    text = "car offset: " + str(offset)
+    cv2.putText(out_img, text, (10, 100), cv2.FONT_HERSHEY_PLAIN, 2.0, (255, 255, 255), 3)
 
     return out_img
 
 ############################################################################################################
 
 def process_images():
-
     images = glob.glob('./test_images/*.jpg')
-
     for fname in images:
-        # apply a distortion correction
-        img = cv2.imread(fname)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        plt.figure()
-        out_img = process_image(img)
-        filename, file_extension = os.path.splitext(fname)
-        plt.savefig(filename + '_out' + '.jpeg')
-
-        # img_undist = cv2.undistort(img, mtx, dist, None, mtx)
-        #
-        # # create thresholded binary image
-        # ksize = 3
-        # gradx_mask = sobel_threshold(img_undist, orient='x', sobel_kernel=ksize, thresh=(40, 255))
-        # grady_mask = sobel_threshold(img_undist, orient='y', sobel_kernel=ksize, thresh=(40, 255))
-        # # mag_mask = mag_thresh(img_undist, sobel_kernel=ksize, thresh=(20, 150))
-        # # dir_mask = dir_threshold(img_undist, sobel_kernel=ksize, thresh=(0.7, 1.3))
-        # r_mask = r_threshold(img_undist, thresh=(230, 255))
-        # s_mask = s_threshold(img_undist, thresh=(170, 255))
-        #
-        # combined = np.zeros_like(gradx_mask)
-        # combined[(s_mask == 1) | (r_mask == 1) | ((gradx_mask == 1) & (grady_mask == 1))] = 1
-        #
-        # # gradxy_mask = np.zeros_like(gradx_mask)
-        # # gradxy_mask[((gradx_mask == 1) & (grady_mask == 1))] = 1
-        #
-        # # apply a perspective transform to rectify binary image ("birds-eye view")
-        # src_coord = np.float32([[700, 450], [1110, 660], [190, 660], [580, 450]])
-        # offset = 100
-        # img_size = (img_undist.shape[1], img_undist.shape[0])
-        # # offset = 0
-        # # img_size = (300, 300)
-        # dst_coord = np.float32([[img_size[0] - offset, offset], [img_size[0] - offset, img_size[1] - offset],
-        #                         [offset, img_size[1] - offset], [offset, offset]])
-        # M = cv2.getPerspectiveTransform(src_coord, dst_coord)
-        # # Minv = cv2.getPerspectiveTransform(dst_coord, src_coord)
-        # combined = cv2.warpPerspective(combined, M, img_size, flags=cv2.INTER_LINEAR)
-        #
-        # plt.figure()
-        # out_img = find_lanes_and_fit_polynomials(combined)
-        #
-        # # plt.imshow(img_undist)
-        # # plt.plot(src_coord[0][0], src_coord[0][1], '.')
-        # # plt.plot(src_coord[1][0], src_coord[1][1], '.')
-        # # plt.plot(src_coord[2][0], src_coord[2][1], '.')
-        # # plt.plot(src_coord[3][0], src_coord[3][1], '.')
-        #
-        # # plt.imshow(s_mask, cmap='gray')
-        # # plt.axis('off')
-        # filename, file_extension = os.path.splitext(fname)
-        # # plt.savefig(filename + '_smask' + '.jpeg')
-        # # plt.imshow(r_mask, cmap='gray')
-        # # plt.axis('off')
-        # # plt.savefig(filename + '_rmask' + '.jpeg')
-        # # plt.imshow(gradx_mask, cmap='gray')
-        # # plt.axis('off')
-        # # plt.savefig(filename + '_gradx' + '.jpeg')
-        # # plt.imshow(grady_mask, cmap='gray')
-        # # plt.axis('off')
-        # # plt.savefig(filename + '_grady' + '.jpeg')
-        # # plt.imshow(gradxy_mask, cmap='gray')
-        # # plt.axis('off')
-        # # plt.savefig(filename + '_gradxy' + '.jpeg')
-        #
-        # # plt.imshow(combined, cmap='gray')
-        # # plt.axis('off')
-        # plt.savefig(filename + '_out' + '.jpeg')
+        process_image(fname)
 
 ############################################################################################################
 
+class History():
+    def __init__(self):
+        self.left_curverad = 0
+        self.right_curverad = 0
+        self.left_fit = []
+        self.right_fit = []
+
 def process_video():
-
     input_clip_file = "project_video.mp4"
-    output_clip_file = "project_video_with_lanes.mp4"
-
+    output_clip_file = "project_video_with_lines.mp4"
+    history = History()
     input_clip = VideoFileClip(input_clip_file)
-    output_clip = input_clip.fl_image(process_video_frame)
+    output_clip = input_clip.fl_image(lambda img: process_video_frame(img, history))
     output_clip.write_videofile(output_clip_file, audio=False)
 
 ############################################################################################################
 
-#process_images()
+calibrate()
+process_images()
 process_video()
