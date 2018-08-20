@@ -128,11 +128,3 @@ The example video with detected lane lines is provided by `project_video_with_li
 
 The possible problem with the current pipeline could be lane lines detection in different or difficult light conditions. This probably could be solved by changing the way how thresholded binary mask is contructed. Probably this better should be done by using some 
 some adaptive algorithms which choose appropriate color channels and other filters depeding on actual light conditions.
-
-### Discussion
-
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
-
-Lighting conditions.
-
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
