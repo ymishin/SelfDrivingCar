@@ -39,9 +39,9 @@ The function `process_image()` contains implementation of the lane lines detecti
 An image is undistorted using results obtained from camera calibration step. Here are some examples after distortion correction:
 
 <p float="left">
-<img src="./output_images/undistorted_test1.jpg" width="300">
-<img src="./output_images/undistorted_test2.jpg" width="300">
-<img src="./output_images/undistorted_test3.jpg" width="300">
+<img src="./output_images/undistorted_test1.jpg" width="250">
+<img src="./output_images/undistorted_test2.jpg" width="250">
+<img src="./output_images/undistorted_test3.jpg" width="250">
 </p>
 
 #### Construction of binary image
@@ -55,9 +55,9 @@ After some experiments, the combination of the following masks was choosen to co
 Here are some example of thresholded binary images:
 
 <p float="left">
-<img src="./output_images/binary_test1.jpg" width="300">
-<img src="./output_images/binary_test2.jpg" width="300">
-<img src="./output_images/binary_test3.jpg" width="300">
+<img src="./output_images/binary_test1.jpg" width="250">
+<img src="./output_images/binary_test2.jpg" width="250">
+<img src="./output_images/binary_test3.jpg" width="250">
 </p>
 
 #### Perspective transform
@@ -74,9 +74,9 @@ Perspective transform is applied to rectify binary image ("birds-eye view"). Aft
 The perspective transform is perfomed by subsequently calling `getPerspectiveTransform()` and `warpPerspective()`. Some examples of warped images are here:
 
 <p float="left">
-<img src="./output_images/warped_test1.jpg" width="300">
-<img src="./output_images/warped_test2.jpg" width="300">
-<img src="./output_images/warped_test3.jpg" width="300">  
+<img src="./output_images/warped_test1.jpg" width="250">
+<img src="./output_images/warped_test2.jpg" width="250">
+<img src="./output_images/warped_test3.jpg" width="250">  
 </p>
 
 #### Lane-line pixels identification and polynomial fitting
@@ -89,9 +89,9 @@ Lane-line pixels and polynomial fitting are performed in `find_lanes_and_fit_pol
 Found lane-line pixels are then fitted with 2nd order polynomials. Here are some example images:
 
 <p float="left">
-<img src="./output_images/poly_test1.jpg" width="300">
-<img src="./output_images/poly_test2.jpg" width="300">
-<img src="./output_images/poly_test3.jpg" width="300">
+<img src="./output_images/poly_test1.jpg" width="250">
+<img src="./output_images/poly_test2.jpg" width="250">
+<img src="./output_images/poly_test3.jpg" width="250">
 </p>  
 
 #### Lane curvatures and vehicle position calculations
@@ -113,9 +113,9 @@ Here are the results for 3 images from the previous section:
 Finallly, processed image is warped back to the original image space using perspective transform with an inverse matrix and merged with the original image. Here are some example images:
 
 <p float="left">
-<img src="./output_images/poly_test1.jpg" width="300">
-<img src="./output_images/poly_test2.jpg" width="300">
-<img src="./output_images/poly_test3.jpg" width="300">
+<img src="./output_images/poly_test1.jpg" width="250">
+<img src="./output_images/poly_test2.jpg" width="250">
+<img src="./output_images/poly_test3.jpg" width="250">
 </p>  
 
 ### 2. Lane lines detection pipeline (video)
