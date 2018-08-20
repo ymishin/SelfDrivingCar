@@ -13,7 +13,7 @@ The project includes the following files:
 * `svm_classifier.py` is a script to train SVM classifier
 * `tracking.py` is a script to run a vehicle detection pipeline
 * `common_functions.py` contains all the functions used in `svm_classifier.py` and `tracking.py`
-* `test_video_with_tracking.mp4.mp4` is a video with detected vehicles
+* `test_video_with_tracking.mp4` is a video with detected vehicles
 
 ### 2. Feature extraction and trainign SVM classifier
 
