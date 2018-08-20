@@ -126,5 +126,4 @@ The example video with detected lane lines is provided by `project_video_with_li
 
 ### 4. Potential shortcomings and possible improvements with the current pipeline
 
-The possible problem with the current pipeline could be lane lines detection in different or difficult light conditions. This probably could be solved by changing the way how thresholded binary mask is contructed. Probably this better should be done by using some 
-some adaptive algorithms which choose appropriate color channels and other filters depeding on actual light conditions.
+The possible problem with the current pipeline could be lane lines detection in different or difficult light conditions. This probably could be solved by changing the way how thresholded binary mask is contructed. Probably this better should be done by using some adaptive algorithms which choose appropriate color channels and other filters depeding on actual light conditions.
