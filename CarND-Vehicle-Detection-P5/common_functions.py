@@ -167,7 +167,7 @@ def process_single_image(img, clf, scaler, history=None):
     if (history is not None):
         history.add_boxes(boxes)
         add_heat(heatmap, history.boxes)
-        apply_threshold(heatmap, 5)
+        apply_threshold(heatmap, len(history.boxes)//2)
     else:
         add_heat(heatmap, boxes)
         apply_threshold(heatmap, 2)
