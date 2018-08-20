@@ -1,45 +1,34 @@
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
+# **Finding Lane Lines on the Road with Advaned Techniques** 
 
 ---
 
-**Advanced Lane Finding Project**
-
-The goals / steps of this project are the following:
-
-* Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
-* Apply a distortion correction to raw images.
-* Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image ("birds-eye view").
-* Detect lane pixels and fit to find the lane boundary.
-* Determine the curvature of the lane and vehicle position with respect to center.
-* Warp the detected lane boundaries back onto the original image.
-* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
-
-[//]: # (Image References)
-
-[image1]: ./examples/undistort_output.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
-
-## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
-
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+**The goal of this project is to make a pipeline that finds lane lines on the road using some advanced techniques**
 
 ---
 
-### Writeup / README
+### Project files
 
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
+The project includes the following files:
 
-You're reading it!
+* `advanced_lane_lines.py` contains all the functions for lane lines detection pipeline
+* `project_video_with_lanes.mp4` is a video with detected lane lines
 
-### Camera Calibration
+### 1. Camera Calibration
+
+Function `calibrate()` implements camera calibration. This should be done only once and the obtained results are used then by the pipeline. Here two arrays are constructed - object points in real world space and image points in image plane. Image points are found by calling `findChessboardCorners()` on provided calibration images. Object points are just equally distributed reference points (9x6 grid). Then `calibrateCamera()` is called to find correspionding mapping to be used then for distorion correction. Some examples of undistorted calibration images are:
+
+<p float="left">
+<img src="./camera_cal/calibration1.jpg" width="300">
+<img src="./output_images/undistorted_calibration1.jpg" width="300">
+</p>
+<p float="left">
+<img src="./camera_cal/calibration2.jpg" width="300">
+<img src="./output_images/undistorted_calibration2.jpg" width="300">
+</p>
+<p float="left">
+<img src="./camera_cal/calibration3.jpg" width="300">
+<img src="./output_images/undistorted_calibration3.jpg" width="300">
+</p>
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
