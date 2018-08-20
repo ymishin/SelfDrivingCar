@@ -160,8 +160,6 @@ def process_video(clf, scaler):
 
 def process_single_image(img, clf, scaler, history=None):
     heatmap = np.zeros_like(img[:, :, 0]).astype(np.float)
-    #if (history is not None):
-    #    add_heat(heatmap, history.boxes)
     boxes = []
     for scale in [1.0, 1.5, 2.0, 2.5, 3.0, 3.5]:
         hot_windows = find_cars(img, int(img.shape[0] * 0.5), int(img.shape[0] * 1.0), scale, clf, scaler)
@@ -169,34 +167,13 @@ def process_single_image(img, clf, scaler, history=None):
     if (history is not None):
         history.add_boxes(boxes)
         add_heat(heatmap, history.boxes)
-        apply_threshold(heatmap, 5)  # max(1,len(history.boxes)//2)) #1 + len(history.boxes)//2
+        apply_threshold(heatmap, 5)
     else:
         add_heat(heatmap, boxes)
-        apply_threshold(heatmap, 2)  # max(1,len(history.boxes)//2)) #1 + len(history.boxes)//2
-        #for bbox in hot_windows:
-        #    cv2.rectangle(draw_img, bbox[0], bbox[1], (0, 0, 255), 5)
-    #img = draw_boxes(img, hot_windows)
-    #if (history is not None):
-    #    heatmap, actual_boxes = add_history_heat(heatmap, history.boxes)
-    #    add_heat(heatmap, actual_boxes)
-    #    history.boxes = actual_boxes
-    #    history.add_boxes(hot_windows)
-    #img = draw_boxes(img, history.boxes)
-    #apply_threshold(heatmap, len(history.boxes)//2) # max(1,len(history.boxes)//2)) #1 + len(history.boxes)//2
+        apply_threshold(heatmap, 2)
     labels = label(heatmap)
     img, boxes = draw_labeled_bboxes(np.copy(img), labels)
-    #history.add_boxes(boxes)
     return img
-
-def add_history_heat(heatmap, bbox_list):
-    boxes = []
-    for box in bbox_list:
-        area = heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]]
-        if (np.count_nonzero(area) > 0):
-            boxes.append(box)
-            #area[area != 0] += 1
-            #heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] = area
-    return heatmap, boxes
 
 def add_heat(heatmap, bbox_list):
     # Iterate through list of bboxes
