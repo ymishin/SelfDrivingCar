@@ -113,9 +113,9 @@ Here are the results for 3 images from the previous section:
 Finallly, processed image is warped back to the original image space using perspective transform with an inverse matrix and merged with the original image. Here are some example images:
 
 <p float="left">
-<img src="./output_images/poly_test1.jpg" width="250">
-<img src="./output_images/poly_test2.jpg" width="250">
-<img src="./output_images/poly_test3.jpg" width="250">
+<img src="./output_images/lanelines_test1.jpg" width="250">
+<img src="./output_images/lanelines_test2.jpg" width="250">
+<img src="./output_images/lanelines_test3.jpg" width="250">
 </p>  
 
 ### 2. Lane lines detection pipeline (video)
