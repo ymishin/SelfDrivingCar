@@ -34,7 +34,7 @@ Some random image samples from training set:
 
 #### Image Data Preprocessing.
 
-Image data were normalized to zero mean and unit variance.
+Image data were normalized to zero mean and unit variance. This is important step to ensure that the problem is well conditioned and so to help with convergence of an optimizer.
 
 #### CNN architecture.
 
@@ -59,12 +59,16 @@ The network consists of the following layers:
 
 #### CNN training and evaluation.
 
-The CNN was trained using the following parameters:
+After some experimnets, the parameters to train CNN was choosen to be:
 
 * Number of epochs = 10
 * Batch size = 128
 * Keep probabilty for dropout layers = 0.5
 * AdamOptimizer, learning rate = 0.001
+
+If trained longer than 10 epochs, validation loss starts to increase which indicates overfitting.
+
+AdamOptimizer was choosen as it implements both momentum technique and adaptive learning rate and is considered to outperform classic SGD in most cases.
 
 Results of training and evaluation are:
 
@@ -73,7 +77,7 @@ Results of training and evaluation are:
 
 #### Some notes about the choosen model architecture and hyperparameters.
 
-The initial model architecture was equivalent to LeNet-5, except output layer was changed to predict 43 classes. Different values of hyperparameters were evaluated (batch size, number of epochs and learning rate) but it was not possible to attain desired validation set accuracy. Thus the model was substantially increased. The final model contains 2 convolution and 3 fully connected layers as LeNet-5, but all layers are larger. Besides, two dropout layers were added to help with possible overfitting problems.
+The initial model architecture was equivalent to LeNet-5, except output layer was changed to predict 43 classes. Different values of hyperparameters were evaluated (batch size, number of epochs and learning rate) but it was not possible to attain desired validation set accuracy. This can be explained by the fact that LeNet-5 is relatively small CNN and it simply can not be trained to generalize accurate enough the traffic signs data set. Thus the model was substantially increased. The final model contains 2 convolution and 3 fully connected layers as LeNet-5, but all layers are larger. Besides, two dropout layers were added to help with possible overfitting problems.
 
 ### 3. Model Testing on New Images.
 
@@ -91,7 +95,28 @@ All these images should be relatively easy to classify. "80 km/h" sign could be 
 
 #### CNN classification of new traffic signs images.
 
-All images were correctly classified with surpsingly high accuracy. Here are classification probablities:
+All images were correctly classified with surpsingly high accuracy.
+
+Here is the top five softmax probabilities:
+
+```python
+TopKV2(values=array([[  9.99983311e-01,   1.65727470e-05,   3.61731658e-08,
+          2.73640097e-08,   5.12993619e-13],
+       [  9.79301810e-01,   1.75401308e-02,   2.49240967e-03,
+          6.64512918e-04,   8.48542015e-07],
+       [  1.00000000e+00,   8.41183656e-09,   3.37481372e-13,
+          1.27688972e-14,   4.87660479e-16],
+       [  9.99993443e-01,   3.22659889e-06,   1.57561703e-06,
+          8.44999761e-07,   6.64627578e-07],
+       [  9.59331214e-01,   4.06679101e-02,   4.04650450e-07,
+          2.89243332e-07,   8.11519811e-08]], dtype=float32), indices=array([[23, 30, 19, 20, 28],
+       [ 5, 10,  7,  3,  2],
+       [ 8,  7,  5, 28,  4],
+       [14, 17, 29, 13, 15],
+       [25, 31, 30, 29, 21]]))
+```
+
+Here are the extracted classification probablities:
 
 | Image			        | Classification probability  | 
 |:------------------|:----------------------------| 

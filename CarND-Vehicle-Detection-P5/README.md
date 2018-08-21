@@ -13,7 +13,7 @@ The project includes the following files:
 * `svm_classifier.py` is a script to train SVM classifier
 * `tracking.py` is a script to run a vehicle detection pipeline
 * `common_functions.py` contains all the functions used in `svm_classifier.py` and `tracking.py`
-* `test_video_with_tracking.mp4` is a video with detected vehicles
+* `project_video_with_tracking.mp4` is a video with detected vehicles
 
 ### 2. Feature extraction and trainign SVM classifier
 
@@ -23,7 +23,7 @@ The labeled data set for [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_
 * non-car images: 8968
 * image shape: (64, 64, 3)
 
-The data is read by `read_data()` function and then future extraction is performed by `extract_features()` function. `extract_features()` extracts features for each invidual image calling `extract_features_single()`. `extract_features_single()` extracts HOG, binned color and color histogram features and construct and construct one feature vector for each image. 
+The data is read by `read_data()` function and then future extraction is performed by `extract_features()` function. `extract_features()` extracts features for each invidual image calling `extract_features_single()`. `extract_features_single()` extracts HOG, binned color and color histogram features and then constructs one feature vector for each image. 
 
 After feature extraction is done, SVM classifier is trained in `train_svm_classifier()` function. Here, the data set is shuffled and splitted (80% for training, 20% for validation) and normalized using `StandardScaler()`. Then training is performed and accuracy is checked. The obtained accuracy on validation set is :
 
