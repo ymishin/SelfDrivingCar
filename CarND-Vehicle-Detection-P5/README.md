@@ -38,7 +38,7 @@ After some experiments, the following parameters for HOG features extraction wer
 * pix_per_cell: 8
 * cell_per_block: 2
 
-It's also possible to combine HOG features with binned color and color histogram features. Such feature vector was also evaluated, but in that case `pix_per_cell` was choosen to be `16` to prevent significant performance degradation of the the vehicle detection pipeline. However, the detection accuracy with such a vector was lower than with just HOG features extracted with `pix_per_cell = 8`.
+It's also possible to combine HOG features with binned color and color histogram features. Such feature vector was also evaluated, but in that case `pix_per_cell` was choosen to be `16` to prevent significant performance degradation of the vehicle detection pipeline. However, the detection accuracy with such a vector was lower than with just HOG features extracted with `pix_per_cell = 8`.
 
 ### 4. Vehicle detection pipeline
 
@@ -46,10 +46,10 @@ The trained model is stored in a pickle file and then can be used in vehicle det
 
 #### Sliding Window Search
 
-`process_single_image()` calls `find_cars()` to detect vehicles on an image. Here HOG, binned color and color histogram features are extracted and normalized for an individual image, and then scanning is performed to detect possible vehicle locations using pre-trained model. Search window is of the same size, but vehicles can be of different sizes (depedning how far they are), so `find_cars()` is called few times and image is resized inside before scanning for vehicles. After some experiments, the following scales have been choosen:
+`process_single_image()` calls `find_cars()` to detect vehicles on an image. Here HOG features are extracted and normalized for an individual image, and then scanning is performed to detect possible vehicle locations using pre-trained model. Search window is of the same size, but vehicles can be of different sizes (depedning how far they are), so `find_cars()` is called few times and image is resized inside before scanning for vehicles. After some experiments, the following scales have been choosen:
 
-* 0.75 for (0.5 * *image_heigh*) to (0.7 * *image_height*)
-* 1.0, 1.5, 2.0, 2.5, 3.0, 3.5 for (0.5 * *image_height*) to (1.0 * *image_height*)
+* 0.75 for scanning from (0.5 * *image_heigh*) to (0.7 * *image_height*)
+* 1.0, 1.5, 2.0, 2.5, 3.0, 3.5 for scanning from (0.5 * *image_height*) to (1.0 * *image_height*)
 
 After calling `find_cars()` all detected vehicle locations (bounding boxes) are stored in one single list.
 
