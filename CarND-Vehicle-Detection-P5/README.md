@@ -27,7 +27,7 @@ The data is read by `read_data()` function and then future extraction is perform
 
 After feature extraction is done, SVM classifier is trained in `train_svm_classifier()` function. Here, the data set is shuffled and splitted (80% for training, 20% for validation) and normalized using `StandardScaler()`. Then training is performed and accuracy is checked. The obtained accuracy on validation set is :
 
-* SVM accuracy: 0.99
+* SVM accuracy: 0.98
 
 ### 3. Some notes on feature selection and HOG paramaters
 
@@ -38,7 +38,7 @@ After some experiments, the following parameters for HOG features extraction wer
 * pix_per_cell: 8
 * cell_per_block: 2
 
-It's also possible to combine HOG features with binned color and color histogram features. Such feature vector was also evaluated, but in that case `pix_per_cell` was choosen to be 16 to prevent significant performance degradation of the the vehicle detection pipeline. However, the detection accuracy with such a vector was lower than with just HOG features extracted with `pix_per_cell = 8`.
+It's also possible to combine HOG features with binned color and color histogram features. Such feature vector was also evaluated, but in that case `pix_per_cell` was choosen to be `16` to prevent significant performance degradation of the the vehicle detection pipeline. However, the detection accuracy with such a vector was lower than with just HOG features extracted with `pix_per_cell = 8`.
 
 ### 4. Vehicle detection pipeline
 
