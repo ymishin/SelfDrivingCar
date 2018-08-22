@@ -48,8 +48,8 @@ The trained model is stored in a pickle file and then can be used in vehicle det
 
 `process_single_image()` calls `find_cars()` to detect vehicles on an image. Here HOG, binned color and color histogram features are extracted and normalized for an individual image, and then scanning is performed to detect possible vehicle locations using pre-trained model. Search window is of the same size, but vehicles can be of different sizes (depedning how far they are), so `find_cars()` is called few times and image is resized inside before scanning for vehicles. After some experiments, the following scales have been choosen:
 
-* 0.75 for (0.5 * *image_heigh*) to (0.7 * *image_heigh*)
-* 1.0, 1.5, 2.0, 2.5, 3.0, 3.5 for (0.5 * *image_heigh*) to (1.0 * *image_heigh*)
+* 0.75 for (0.5 * *image_heigh*) to (0.7 * *image_height*)
+* 1.0, 1.5, 2.0, 2.5, 3.0, 3.5 for (0.5 * *image_height*) to (1.0 * *image_height*)
 
 After calling `find_cars()` all detected vehicle locations (bounding boxes) are stored in one single list.
 
