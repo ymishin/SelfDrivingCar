@@ -13,7 +13,6 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from scipy.ndimage.measurements import label
 from moviepy.editor import VideoFileClip
-from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 
 ############################################################################################################
 
