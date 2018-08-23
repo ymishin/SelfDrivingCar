@@ -98,15 +98,32 @@ Found lane-line pixels are then fitted with 2nd order polynomials. Here are some
 
 Lane curvatures and vehicle position calculations are performed in `find_lanes_and_fit_polynomials()` and `measure_curvature_pixels()` functions.
 
-Conversion from pixels to meters is performed and polynomial fitting is done in meters. These fits are then applied to to find lane curvatures.
+Conversion from pixels to meters is performed and polynomial fitting is done in meters. These fits are then applied to find lane curvatures.
 
 Vehicle offset is calculated by substituting midpoint of detected road from center of the image and then converting to meters.
 
 Here are the results for 3 images from the previous section:
 
-* Left radius / right radius / offset : 1141.42699981 / 681.728414634 / -0.142696388245
-* Left radius / right radius / offset : 502.189134665 / 964.244117874 / -0.349519435763
-* Left radius / right radius / offset : 956.37563679 / 654.105433233 / -0.067165795375
+<table align="left">
+    <tr>
+        <td><b>Left Radius</b></td>
+        <td>1141</td>
+        <td>502</td>
+        <td>956</td>
+    </tr>
+    <tr>
+        <td><b>Right Radius</b></td>
+        <td>682</td>
+        <td>964</td>
+        <td>654</td>
+    </tr>
+      <tr>
+        <td><b>Vehicle Offset</b></td>
+        <td>-0.14</td>
+        <td>-0.35</td>
+        <td>-0.07</td>
+    </tr>
+</table>
 
 #### Final result
 
