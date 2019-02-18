@@ -48,6 +48,7 @@ VectorXd Cartesioan2Polar(const VectorXd &x) {
   polar(0) = sqrt(x(0) * x(0) + x(1) * x(1));
   polar(1) = atan2(x(1), x(0));
   polar(2) = (x(0) * x(2) + x(1) * x(3)) / polar(0);
+  return polar;
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
