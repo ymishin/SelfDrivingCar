@@ -26,7 +26,7 @@ void KalmanFilter::Predict() {
   /**
    * TODO: predict the state
    */
-  x_ = F_ * x_ + u_;
+  x_ = F_ * x_; // + u_;
   P_ = F_ * P_ * F_.transpose() + Q_;
 }
 
@@ -36,14 +36,28 @@ void KalmanFilter::Update(const VectorXd &z) {
    */
   VectorXd y = z - H_ * x_;
   MatrixXd S = H_ * P_ * H_.transpose() + R_;
-  MatrixXd K = P_ * H_.transpose() * S_.inverse();
+  MatrixXd K = P_ * H_.transpose() * S.inverse();
   x_ = x_ + K * y;
   MatrixXd I = MatrixXd::Identity(x_.size(), x_.size());
   P_ = (I - K * H_) * P_;
+}
+
+VectorXd Cartesioan2Polar(const VectorXd &x) {
+  // TODO: check for division by zero, normalize
+  VectorXd polar = VectorXd(3);
+  polar(0) = sqrt(x(0) * x(0) + x(1) * x(1));
+  polar(1) = atan2(x(1), x(0));
+  polar(2) = (x(0) * x(2) + x(1) * x(3)) / polar(0);
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
    * TODO: update the state by using Extended Kalman Filter equations
    */
+  VectorXd y = z - Cartesioan2Polar(x_);
+  MatrixXd S = H_ * P_ * H_.transpose() + R_;
+  MatrixXd K = P_ * H_.transpose() * S.inverse();
+  x_ = x_ + K * y;
+  MatrixXd I = MatrixXd::Identity(x_.size(), x_.size());
+  P_ = (I - K * H_) * P_;
 }
