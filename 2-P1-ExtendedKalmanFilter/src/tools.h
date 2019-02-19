@@ -3,7 +3,10 @@
 
 #include "Eigen/Dense"
 #include <vector>
-#include <iostream>
+
+using Eigen::VectorXd;
+using Eigen::MatrixXd;
+using std::vector;
 
 class Tools {
  public:
@@ -20,14 +23,8 @@ class Tools {
   /**
    * A helper method to calculate RMSE.
    */
-  static Eigen::VectorXd CalculateRMSE(const std::vector<Eigen::VectorXd> &estimations, 
-                                       const std::vector<Eigen::VectorXd> &ground_truth);
-
-  /**
-   * A helper method to calculate Jacobians.
-   */
-  static Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd& x_state);
-
+  static VectorXd CalculateRMSE(const vector<VectorXd> &estimations, 
+                                const vector<VectorXd> &ground_truth);
 };
 
 #endif  // TOOLS_H_
