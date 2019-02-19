@@ -17,12 +17,6 @@ FusionEKF::FusionEKF() {
   ekf_.R_radar_ << 0.09, 0, 0,
                    0, 0.0009, 0,
                    0, 0, 0.09;
-  
-  // state covariance matrix
-  ekf_.P_ << 1, 0, 0, 0,
-             0, 1, 0, 0,
-             0, 0, 1000, 0,
-             0, 0, 0, 1000;
 
   // measurement matrix for lidar update
   ekf_.H_lidar_ << 1, 0, 0, 0,
@@ -50,6 +44,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       ekf_.x_ << z(0), z(1), 0, 0;
     }
+
+	// state covariance matrix
+	ekf_.P_ << 1, 0, 0, 0,
+		       0, 1, 0, 0,
+		       0, 0, 1, 0,
+               0, 0, 0, 1;
 
     // done initializing, no need to predict or update
     is_initialized_ = true;
