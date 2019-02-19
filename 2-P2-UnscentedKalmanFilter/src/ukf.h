@@ -44,7 +44,6 @@ class UKF {
    */
   void UpdateRadar(const MeasurementPackage &meas_package);
 
-
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
 
@@ -85,7 +84,7 @@ class UKF {
   double std_radphi_;
 
   // Radar measurement noise standard deviation radius change in m/s
-  double std_radrd_ ;
+  double std_radrd_;
 
   // Weights of sigma points
   VectorXd weights_;

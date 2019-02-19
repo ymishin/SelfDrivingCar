@@ -4,29 +4,21 @@
  * Initializes Unscented Kalman filter
  */
 UKF::UKF() {
+  
   // if this is false, laser measurements will be ignored (except during init)
   use_laser_ = true;
 
   // if this is false, radar measurements will be ignored (except during init)
   use_radar_ = true;
 
-  // initial state vector
-  x_ = VectorXd(5);
-
-  // initial covariance matrix
-  P_ = MatrixXd(5, 5);
-
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 1; // 30; // TODO: tune
+  // TODO: tune
+  std_a_ = 1; // 30; 
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = M_PI / 50; // 30; // TODO: tune
+  // TODO: tune
+  std_yawdd_ = M_PI / 30; // 30; 
   
-  /**
-   * DO NOT MODIFY measurement noise values below.
-   * These are provided by the sensor manufacturer.
-   */
-
   // Laser measurement noise standard deviation position1 in m
   std_laspx_ = 0.15;
 
@@ -41,17 +33,26 @@ UKF::UKF() {
 
   // Radar measurement noise standard deviation radius change in m/s
   std_radrd_ = 0.3;
-  
-  /**
-   * End DO NOT MODIFY section for measurement noise values 
-   */
-  
+
   /**
    * TODO: Complete the initialization. See ukf.h for other member properties.
    * Hint: one or more values initialized above might be wildly off...
    */
 
+  // state dimention
+  n_x_ = 5;
+
+  // augmented dimension
+  n_aug_ = 7;
+
+  // sigma point spreading parameter
+  lambda_ = 3 - n_aug_;
+
+  // state vector
+  x_ = VectorXd(n_x_);
+
   // state covariance matrix
+  P_ = MatrixXd(n_x_, n_x_);
   P_ << 1, 0, 0, 0, 0,
         0, 1, 0, 0, 0,
         0, 0, 1, 0, 0,
