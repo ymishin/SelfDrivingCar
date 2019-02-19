@@ -9,18 +9,22 @@ FusionEKF::FusionEKF() {
 
   previous_timestamp_ = 0;
 
+  // lidar measurement covariance matrix
   ekf_.R_lidar_ << 0.0225, 0,
                    0, 0.0225;
 
+  // radar measurement covariance matrix
   ekf_.R_radar_ << 0.09, 0, 0,
                    0, 0.0009, 0,
                    0, 0, 0.09;
   
+  // state covariance matrix
   ekf_.P_ << 1, 0, 0, 0,
              0, 1, 0, 0,
              0, 0, 1000, 0,
              0, 0, 0, 1000;
 
+  // measurement matrix for lidar update
   ekf_.H_lidar_ << 1, 0, 0, 0,
                    0, 1, 0, 0;
 }
@@ -59,6 +63,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   double dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1.0e+6;
   previous_timestamp_ = measurement_pack.timestamp_;
 
+  // process noise
   double noise_ax = 9;
   double noise_ay = 9;
 

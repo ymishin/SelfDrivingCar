@@ -21,11 +21,13 @@ void KalmanFilter::Predict(const double dt, const double noise_ax, const double 
   double dt_3 = dt_2 * dt;
   double dt_4 = dt_3 * dt;
 
+  // update state transition matrix
   F_ << 1, 0, dt, 0,
         0, 1, 0, dt,
         0, 0, 1, 0,
         0, 0, 0, 1;
-
+  
+  // update process covariance matrix
   Q_ << dt_4 / 4 * noise_ax, 0, dt_3 / 2 * noise_ax, 0,
         0, dt_4 / 4 * noise_ay, 0, dt_3 / 2 * noise_ay,
         dt_3 / 2 * noise_ax, 0, dt_2 * noise_ax, 0,
@@ -72,6 +74,7 @@ void KalmanFilter::Cartesian2Polar(const VectorXd &x, VectorXd *x_polar) {
 
 void KalmanFilter::NormalizePhi(VectorXd *y) {
   
+  // make sure phi is in the range (-pi, pi)
   double phi = (*y)(1);
   phi += (phi > 0) ? M_PI : -M_PI;
   double pi2 = 2.0 * M_PI;  
