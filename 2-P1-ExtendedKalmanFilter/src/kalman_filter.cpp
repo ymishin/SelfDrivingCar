@@ -54,6 +54,7 @@ void KalmanFilter::UpdateRadar(const VectorXd &z) {
   VectorXd x_polar(3);
   Cartesian2Polar(x_, &x_polar);
   VectorXd y = z - x_polar;
+  NormalizePhi(&y);
   CalculateJacobian(x_, &H_radar_);
   MatrixXd S = H_radar_ * P_ * H_radar_.transpose() + R_radar_;
   MatrixXd K = P_ * H_radar_.transpose() * S.inverse();
@@ -63,10 +64,19 @@ void KalmanFilter::UpdateRadar(const VectorXd &z) {
 }
 
 void KalmanFilter::Cartesian2Polar(const VectorXd &x, VectorXd *x_polar) {
-  // TODO: check for division by zero, normalize
+  
   (*x_polar)(0) = sqrt(x(0) * x(0) + x(1) * x(1));
   (*x_polar)(1) = atan2(x(1), x(0));
   (*x_polar)(2) = (x(0) * x(2) + x(1) * x(3)) / (*x_polar)(0);
+}
+
+void KalmanFilter::NormalizePhi(VectorXd *y) {
+  
+  double phi = (*y)(1);
+  phi += (phi > 0) ? M_PI : -M_PI;
+  double pi2 = 2.0 * M_PI;  
+  int div = phi / pi2;
+  (*y)(1) -= div * pi2;
 }
 
 void KalmanFilter::CalculateJacobian(const VectorXd& x_state, MatrixXd *Hj) {

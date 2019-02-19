@@ -2,6 +2,7 @@
 #define KALMAN_FILTER_H_
 
 #include "Eigen/Dense"
+#include <cmath>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -42,6 +43,11 @@ class KalmanFilter {
    * Convert cartesian state vector to polar
    */
   void Cartesian2Polar(const VectorXd &x, VectorXd *x_polar);
+
+  /**
+   * Normalize phi angle
+   */
+  void NormalizePhi(VectorXd *y);
 
   // state vector
   Eigen::VectorXd x_;
