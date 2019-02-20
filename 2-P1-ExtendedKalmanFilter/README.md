@@ -2,6 +2,6 @@
 
 ---
 
-**The goal of this project is to implement linear and extended kalman filters to to estimate the state of a moving object of interest with noisy lidar and radar measurements**
+**The goal of this project is to implement linear and extended kalman filters to estimate the state of a moving object with noisy lidar and radar measurements**
 
 ---
