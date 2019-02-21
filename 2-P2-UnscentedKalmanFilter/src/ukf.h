@@ -44,7 +44,7 @@ class UKF {
   /**
    * Angle normalization
    */
-  void NormalizePhi(VectorXd *x);
+  void NormalizePhi(double *x);
 
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
