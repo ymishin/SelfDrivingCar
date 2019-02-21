@@ -13,11 +13,11 @@ UKF::UKF() {
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
   // TODO: tune
-  std_a_ = 1; // 30; 
+  std_a_ = 0.3; // 30; 
 
   // Process noise standard deviation yaw acceleration in rad/s^2
   // TODO: tune
-  std_yawdd_ = M_PI / 30; // 30; 
+  std_yawdd_ = 0.3; // 30; 
   
   // Laser measurement noise standard deviation position1 in m
   std_laspx_ = 0.15;
@@ -236,6 +236,113 @@ void UKF::NormalizePhi(VectorXd *x) {
     (*x)(1) -= div * pi2;
 }
 
+void UKF::UpdateRadar(const MeasurementPackage &meas_package) {
+    /**
+     * TODO: Complete this function! Use radar data to update the belief
+     * about the object's position. Modify the state vector, x_, and
+     * covariance, P_.
+     * You can also calculate the radar NIS, if desired.
+     */
+
+ /*   MatrixXd R_radar_(3, 3);
+    R_radar_ << std_radr_ * std_radr_, 0, 0,
+        0, std_radphi_ * std_radphi_, 0,
+        0, 0, std_radrd_ * std_radrd_;*/
+
+    // ...
+
+  // sigma points in measurement space
+  MatrixXd Zsig(3, 2 * n_aug_ + 1);
+
+  // mean predicted measurement
+  VectorXd z_pred(3);
+
+  // measurement covariance matrix
+  MatrixXd S(3, 3);
+
+  // sigma points in measurement space
+  for (unsigned int i = 0; i < 2 * n_aug_ + 1; ++i) {
+
+      double p_x = Xsig_pred_(0, i);
+      double p_y = Xsig_pred_(1, i);
+      double v = Xsig_pred_(2, i);
+      double yaw = Xsig_pred_(3, i);
+
+      double v1 = cos(yaw) * v;
+      double v2 = sin(yaw) * v;
+
+      Zsig(0, i) = sqrt(p_x * p_x + p_y * p_y);
+      Zsig(1, i) = atan2(p_y, p_x);
+      Zsig(2, i) = (p_x * v1 + p_y * v2) / sqrt(p_x * p_x + p_y * p_y);
+  }
+
+  // mean predicted measurement
+  z_pred.fill(0);
+  for (unsigned int i = 0; i < 2 * n_aug_ + 1; ++i) {
+      z_pred = z_pred + weights_(i) * Zsig.col(i);
+  }
+  //z_pred = Zsig  * weights_.transpose();
+
+  // covariance matrix
+  S.fill(0);
+  for (unsigned int i = 0; i < 2 * n_aug_ + 1; ++i) {  // 2n+1 simga points
+    // residual
+      VectorXd z_diff = Zsig.col(i) - z_pred;
+
+      // angle normalization
+      while (z_diff(1) > M_PI) z_diff(1) -= 2.*M_PI;
+      while (z_diff(1) < -M_PI) z_diff(1) += 2.*M_PI;
+
+      S = S + weights_(i) * z_diff * z_diff.transpose();
+  }
+
+  // add measurement noise covariance matrix
+  MatrixXd R = MatrixXd(3, 3);
+  R << std_radr_ * std_radr_, 0, 0,
+      0, std_radphi_ * std_radphi_, 0,
+      0, 0, std_radrd_ * std_radrd_;
+  S = S + R;
+
+  // update state
+
+  MatrixXd Tc = MatrixXd(n_x_, 3);
+
+
+   // calculate cross correlation matrix
+  Tc.fill(0.0);
+  for (unsigned int i = 0; i < 2 * n_aug_ + 1; ++i) {  // 2n+1 simga points
+    // residual
+      VectorXd z_diff = Zsig.col(i) - z_pred;
+      // angle normalization
+      while (z_diff(1) > M_PI) z_diff(1) -= 2.*M_PI;
+      while (z_diff(1) < -M_PI) z_diff(1) += 2.*M_PI;
+
+      // state difference
+      VectorXd x_diff = Xsig_pred_.col(i) - x_;
+      // angle normalization
+      while (x_diff(3) > M_PI) x_diff(3) -= 2.*M_PI;
+      while (x_diff(3) < -M_PI) x_diff(3) += 2.*M_PI;
+
+      Tc = Tc + weights_(i) * x_diff * z_diff.transpose();
+  }
+
+  // Kalman gain K;
+  MatrixXd K = Tc * S.inverse();
+
+  // residual
+  VectorXd z_diff = meas_package.raw_measurements_ - z_pred;
+
+  // angle normalization
+  while (z_diff(1) > M_PI) z_diff(1) -= 2.*M_PI;
+  while (z_diff(1) < -M_PI) z_diff(1) += 2.*M_PI;
+
+  // update state mean and covariance matrix
+  x_ = x_ + K * z_diff;
+  P_ = P_ - K * S * K.transpose();
+
+
+}
+
 void UKF::UpdateLidar(const MeasurementPackage &meas_package) {
   /**
    * TODO: Complete this function! Use lidar data to update the belief 
@@ -258,20 +365,4 @@ void UKF::UpdateLidar(const MeasurementPackage &meas_package) {
   x_ = x_ + K * y;
   MatrixXd I = MatrixXd::Identity(x_.size(), x_.size());
   P_ = (I - K * H_lidar_) * P_;
-}
-
-void UKF::UpdateRadar(const MeasurementPackage &meas_package) {
-  /**
-   * TODO: Complete this function! Use radar data to update the belief 
-   * about the object's position. Modify the state vector, x_, and 
-   * covariance, P_.
-   * You can also calculate the radar NIS, if desired.
-   */
-
-  MatrixXd R_radar_(3, 3);
-  R_radar_ << std_radr_ * std_radr_, 0, 0,
-              0, std_radphi_ * std_radphi_, 0,
-              0, 0, std_radrd_ * std_radrd_;
-
-  // ...
 }
