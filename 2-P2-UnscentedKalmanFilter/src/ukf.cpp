@@ -53,11 +53,21 @@ UKF::UKF() {
 
   // state covariance matrix
   P_ = MatrixXd(n_x_, n_x_);
-  P_ << 1, 0, 0, 0, 0,
-        0, 1, 0, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 0, 1, 0,
-        0, 0, 0, 0, 1;
+
+  // predicted sigma points matrix
+  Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
+
+  // augemented state vector
+  x_aug_ = VectorXd(n_aug_);
+
+  // augmented covariance matrix
+  P_aug_ = MatrixXd(n_aug_, n_aug_);
+
+  // augmented sigma points matrix
+  Xsig_aug_ = MatrixXd(n_aug_, 2 * n_aug_ + 1);
+
+  // weights of sigma points
+  weights_ = VectorXd(2 * n_aug_ + 1);
 
   is_initialized_ = false;
 }
@@ -78,12 +88,20 @@ void UKF::ProcessMeasurement(const MeasurementPackage &meas_package) {
 
     const VectorXd &z = meas_package.raw_measurements_;
 
+    // state vector
     if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
       x_ << z(0) * cos(z(1)), z(0) * sin(z(1)), 0, 0, 0;
     }
     else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
       x_ << z(0), z(1), 0, 0, 0;
     }
+
+    // state covariance matrix
+    P_ << 1, 0, 0, 0, 0,
+          0, 1, 0, 0, 0,
+          0, 0, 1, 0, 0,
+          0, 0, 0, 1, 0,
+          0, 0, 0, 0, 1;
 
     // done initializing, no need to predict or update
     is_initialized_ = true;
@@ -122,6 +140,100 @@ void UKF::Prediction(const double delta_t) {
   //std_yawdd_;
   //x_ = F_ * x_;
   //P_ = F_ * P_ * F_.transpose() + Q_;
+
+  // augemented state vector
+  x_aug_.head(n_x_) = x_;
+  x_aug_(5) = 0;
+  x_aug_(6) = 0;
+
+  // augmented covariance matrix
+  P_aug_.fill(0);
+  P_aug_.topLeftCorner(n_x_, n_x_) = P_;
+  P_aug_(5, 5) = std_a_ * std_a_;
+  P_aug_(6, 6) = std_yawdd_ * std_yawdd_;
+
+  // generate augmented sigma points
+  Xsig_aug_.col(0) = x_aug_;
+  MatrixXd A = P_aug_.llt().matrixL();
+  for (unsigned int i = 0; i < n_aug_; ++i) {
+    Xsig_aug_.col(i + 1) = x_aug_ + sqrt(lambda_ + n_aug_) * A.col(i);
+    Xsig_aug_.col(i + 1 + n_aug_) = x_aug_ - sqrt(lambda_ + n_aug_) * A.col(i);
+  }
+
+  // predict sigma points at next time step
+  for (unsigned int i = 0; i < 2 * n_aug_ + 1; ++i) {
+
+      double p_x = Xsig_aug_(0, i);
+      double p_y = Xsig_aug_(1, i);
+      double v = Xsig_aug_(2, i);
+      double yaw = Xsig_aug_(3, i);
+      double yawd = Xsig_aug_(4, i);
+      double nu_a = Xsig_aug_(5, i);
+      double nu_yawdd = Xsig_aug_(6, i);
+
+      double px_p, py_p;
+      if (fabs(yawd) > div_eps) {
+          px_p = p_x + v / yawd * (sin(yaw + yawd * delta_t) - sin(yaw));
+          py_p = p_y + v / yawd * (cos(yaw) - cos(yaw + yawd * delta_t));
+      }
+      else {
+          px_p = p_x + v * delta_t * cos(yaw);
+          py_p = p_y + v * delta_t * sin(yaw);
+      }
+      double v_p = v;
+      double yaw_p = yaw + yawd * delta_t;
+      double yawd_p = yawd;
+
+      // add process noise
+      px_p += 0.5 * nu_a * delta_t * delta_t * cos(yaw);
+      py_p += 0.5 * nu_a * delta_t * delta_t * sin(yaw);
+      v_p += nu_a * delta_t;
+      yaw_p += 0.5 * nu_yawdd * delta_t * delta_t;
+      yawd_p += nu_yawdd * delta_t;
+
+      // store predicted sigma point
+      Xsig_pred_(0, i) = px_p;
+      Xsig_pred_(1, i) = py_p;
+      Xsig_pred_(2, i) = v_p;
+      Xsig_pred_(3, i) = yaw_p;
+      Xsig_pred_(4, i) = yawd_p;
+  }
+
+  // sigma points weights  
+  weights_.fill(0.5 / (n_aug_ + lambda_));
+  weights_(0) = lambda_ / (lambda_ + n_aug_);
+
+  // predicted state mean
+  x_.fill(0);
+  for (unsigned int i = 0; i < 2 * n_aug_ + 1; ++i) {
+      x_ = x_ + weights_(i) * Xsig_pred_.col(i);
+  }
+  //x_ = Xsig_pred_ * weights_.transpose();
+  //x_ = Xsig_pred_ * weights_;
+
+  // predicted state covariance matrix
+  P_.fill(0);
+  for (unsigned int i = 0; i < 2 * n_aug_ + 1; ++i) {  // iterate over sigma points
+    // state difference
+      VectorXd x_diff = Xsig_pred_.col(i) - x_;
+      
+      // angle normalization
+      //NormalizePhi(&x_diff);
+      while (x_diff(3) > M_PI) x_diff(3) -= 2. * M_PI;
+      while (x_diff(3) < -M_PI) x_diff(3) += 2. * M_PI;
+
+      P_ = P_ + weights_(i) * x_diff * x_diff.transpose();
+  }
+}
+
+void UKF::NormalizePhi(VectorXd *x) {
+
+    // make sure phi is in the range (-pi, pi)
+    double phi = (*x)(3);
+    phi += (phi > 0) ? M_PI : -M_PI;
+    double pi2 = 2. * M_PI;
+    int div = phi / pi2;
+    (*x)(1) -= div * pi2;
 }
 
 void UKF::UpdateLidar(const MeasurementPackage &meas_package) {

@@ -7,6 +7,8 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
+static const double div_eps = 1e-5;
+
 class UKF {
  public:
   /**
@@ -21,28 +23,28 @@ class UKF {
 
   /**
    * ProcessMeasurement
-   * @param meas_package The latest measurement data of either radar or laser
    */
   void ProcessMeasurement(const MeasurementPackage &meas_package);
 
   /**
-   * Prediction Predicts sigma points, the state, and the state covariance
-   * matrix
-   * @param delta_t Time between k and k+1 in s
+   * Prediction Predicts sigma points, the state, and the state covariance matrix
    */
   void Prediction(const double delta_t);
 
   /**
    * Updates the state and the state covariance matrix using a laser measurement
-   * @param meas_package The measurement at k+1
    */
   void UpdateLidar(const MeasurementPackage &meas_package);
 
   /**
    * Updates the state and the state covariance matrix using a radar measurement
-   * @param meas_package The measurement at k+1
    */
   void UpdateRadar(const MeasurementPackage &meas_package);
+
+  /**
+   * Angle normalization
+   */
+  void NormalizePhi(VectorXd *x);
 
   // initially set to false, set to true in first call of ProcessMeasurement
   bool is_initialized_;
@@ -61,6 +63,27 @@ class UKF {
 
   // predicted sigma points matrix
   MatrixXd Xsig_pred_;
+
+  // augemented state vector
+  VectorXd x_aug_;
+
+  // augmented covariance matrix
+  MatrixXd P_aug_;
+
+  // augmented sigma points matrix
+  MatrixXd Xsig_aug_;
+
+  // Weights of sigma points
+  VectorXd weights_;
+
+  // State dimension
+  int n_x_;
+
+  // Augmented state dimension
+  int n_aug_;
+
+  // Sigma point spreading parameter
+  double lambda_;
 
   // time when the state is true, in us
   long long time_us_;
@@ -85,18 +108,6 @@ class UKF {
 
   // Radar measurement noise standard deviation radius change in m/s
   double std_radrd_;
-
-  // Weights of sigma points
-  VectorXd weights_;
-
-  // State dimension
-  int n_x_;
-
-  // Augmented state dimension
-  int n_aug_;
-
-  // Sigma point spreading parameter
-  double lambda_;
 };
 
 #endif  // UKF_H
