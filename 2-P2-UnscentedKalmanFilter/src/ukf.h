@@ -64,15 +64,6 @@ class UKF {
   // predicted sigma points matrix
   MatrixXd Xsig_pred_;
 
-  // augemented state vector
-  VectorXd x_aug_;
-
-  // augmented covariance matrix
-  MatrixXd P_aug_;
-
-  // augmented sigma points matrix
-  MatrixXd Xsig_aug_;
-
   // Weights of sigma points
   VectorXd weights_;
 
