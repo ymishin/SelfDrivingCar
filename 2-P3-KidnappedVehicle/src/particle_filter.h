@@ -73,14 +73,14 @@ class ParticleFilter {
   void prediction(double delta_t, double std_pos[], double velocity, 
                   double yaw_rate);
   
-  /**
-   * dataAssociation Finds which observations correspond to which landmarks 
-   *   (likely by using a nearest-neighbors data association).
-   * @param predicted Vector of predicted landmark observations
-   * @param observations Vector of landmark observations
-   */
-  void dataAssociation(std::vector<LandmarkObs> predicted, 
-                       std::vector<LandmarkObs>& observations);
+  ///**
+  // * dataAssociation Finds which observations correspond to which landmarks 
+  // *   (likely by using a nearest-neighbors data association).
+  // * @param predicted Vector of predicted landmark observations
+  // * @param observations Vector of landmark observations
+  // */
+  //void dataAssociation(std::vector<LandmarkObs> predicted, 
+  //                     std::vector<LandmarkObs>& observations);
   
   /**
    * updateWeights Updates the weights for each particle based on the likelihood
@@ -107,7 +107,7 @@ class ParticleFilter {
    * This can be a very useful debugging tool to make sure transformations 
    *   are correct and assocations correctly connected
    */
-  void SetAssociations(Particle& particle, const std::vector<int>& associations,
+  void setAssociations(Particle& particle, const std::vector<int>& associations,
                        const std::vector<double>& sense_x, 
                        const std::vector<double>& sense_y);
 
@@ -121,7 +121,7 @@ class ParticleFilter {
   /**
    * Multivariate Gaussian probability
    */
-  double MultivProb(double sig_x, double sig_y, double x_obs, double y_obs, double mu_x, double mu_y);
+  double multivProb(double sig_x, double sig_y, double x_obs, double y_obs, double mu_x, double mu_y);
 
   /**
    * Used for obtaining debugging information related to particles.
