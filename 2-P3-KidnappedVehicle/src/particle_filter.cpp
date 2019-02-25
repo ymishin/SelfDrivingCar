@@ -1,25 +1,9 @@
-/**
- * particle_filter.cpp
- *
- * Created on: Dec 12, 2016
- * Author: Tiffany Huang
- */
-
 #include "particle_filter.h"
 
-#include <math.h>
-#include <algorithm>
-#include <iostream>
-#include <iterator>
-#include <numeric>
-#include <random>
-#include <string>
-#include <vector>
+static const double eps = 1e-5;
 
-#include "helper_functions.h"
-
-using std::string;
-using std::vector;
+const unsigned int seed = 777;
+std::mt19937 gen(seed);
 
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
   /**
@@ -30,8 +14,19 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    * NOTE: Consult particle_filter.h for more information about this method 
    *   (and others in this file).
    */
-  num_particles = 0;  // TODO: Set the number of particles
+  
+  num_particles_ = 100;  // TODO: Set the number of particles
 
+  std::normal_distribution<double> dist_x(x, std[0]);
+  std::normal_distribution<double> dist_y(y, std[1]);
+  std::normal_distribution<double> dist_theta(theta, std[2]);
+
+  particles_.reserve(num_particles_);
+  for (unsigned i = 0; i < num_particles_; ++i) {
+    particles_.push_back(Particle(i, dist_x(gen), dist_y(gen), dist_theta(gen)));
+  }
+  
+  weights_.reserve(num_particles_);
 }
 
 void ParticleFilter::prediction(double delta_t, double std_pos[], 
@@ -44,6 +39,21 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
 
+  std::normal_distribution<double> dist_x(0.0, std_pos[0]);
+  std::normal_distribution<double> dist_y(0.0, std_pos[1]);
+  std::normal_distribution<double> dist_theta(0.0, std_pos[2]);
+
+  for (auto &p : particles_) {
+    if (yaw_rate > eps) {
+      p.x_ += velocity / yaw_rate * (sin(p.theta_ + yaw_rate * delta_t) - sin(p.theta_)) + dist_x(gen);
+      p.y_ += velocity / yaw_rate * (cos(p.theta_)  - cos(p.theta_ + yaw_rate * delta_t)) + dist_y(gen);
+    } 
+    else {
+      p.x_ += velocity * delta_t * cos(p.theta_) + dist_x(gen);
+      p.y_ += velocity * delta_t * sin(p.theta_) + dist_x(gen);
+    }
+    p.theta_ += yaw_rate * delta_t + dist_theta(gen);
+  }
 }
 
 void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted, 
@@ -56,7 +66,6 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    *   probably find it useful to implement this method and use it as a helper 
    *   during the updateWeights phase.
    */
-
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
@@ -76,6 +85,40 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
 
+  weights_.clear();
+
+  for (auto &p : particles_) {
+    
+    double weight = 1.;
+    
+    for (const auto &obs : observations) {
+      
+      // Transform to map coordinate system
+      double x_map = p.x_ + cos(p.theta_) * obs.x - sin(p.theta_) * obs.y;
+      double y_map = p.y_ + sin(p.theta_) * obs.x + cos(p.theta_) * obs.y;
+
+      // Find nearest landmark
+      unsigned closest_landmark_ind = 0;
+      int min_dist = std::numeric_limits<int>::max();
+      int curr_dist;
+      for (unsigned i = 0; i < map_landmarks.landmark_list.size(); ++i) {
+        curr_dist = dist(x_map, y_map, 
+                         map_landmarks.landmark_list[i].x_f, map_landmarks.landmark_list[i].y_f);
+        if (curr_dist < min_dist) {
+          min_dist = curr_dist;
+          closest_landmark_ind = i;
+        }
+      }
+      
+      // Update particle weight
+      weight *= MultivProb(std_landmark[0], std_landmark[1], x_map, y_map,
+                           map_landmarks.landmark_list[closest_landmark_ind].x_f,
+                           map_landmarks.landmark_list[closest_landmark_ind].y_f);
+    }
+
+    p.weight_ = weight;
+    weights_.push_back(weight);
+  }
 }
 
 void ParticleFilter::resample() {
@@ -86,6 +129,14 @@ void ParticleFilter::resample() {
    *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
    */
 
+  std::discrete_distribution<int> dist_res(weights_.begin(), weights_.end());
+
+  std::vector<Particle> resampled_particles;
+  resampled_particles.reserve(num_particles_);
+  for (unsigned int i = 0; i < num_particles_; ++i) {
+    resampled_particles.push_back(particles_[dist_res(gen)]);
+  }
+  particles_.swap(resampled_particles);
 }
 
 void ParticleFilter::SetAssociations(Particle& particle, 
@@ -97,13 +148,13 @@ void ParticleFilter::SetAssociations(Particle& particle,
   // associations: The landmark id that goes along with each listed association
   // sense_x: the associations x mapping already converted to world coordinates
   // sense_y: the associations y mapping already converted to world coordinates
-  particle.associations= associations;
-  particle.sense_x = sense_x;
-  particle.sense_y = sense_y;
+  particle.associations_ = associations;
+  particle.sense_x_ = sense_x;
+  particle.sense_y_ = sense_y;
 }
 
 string ParticleFilter::getAssociations(Particle best) {
-  vector<int> v = best.associations;
+  vector<int> v = best.associations_;
   std::stringstream ss;
   copy(v.begin(), v.end(), std::ostream_iterator<int>(ss, " "));
   string s = ss.str();
@@ -115,9 +166,9 @@ string ParticleFilter::getSenseCoord(Particle best, string coord) {
   vector<double> v;
 
   if (coord == "X") {
-    v = best.sense_x;
+    v = best.sense_x_;
   } else {
-    v = best.sense_y;
+    v = best.sense_y_;
   }
 
   std::stringstream ss;
@@ -125,4 +176,13 @@ string ParticleFilter::getSenseCoord(Particle best, string coord) {
   string s = ss.str();
   s = s.substr(0, s.length()-1);  // get rid of the trailing space
   return s;
+}
+
+double ParticleFilter::MultivProb(double sig_x, double sig_y, double x_obs, double y_obs, double mu_x, double mu_y) {
+
+  double gauss_norm = 1. / (2. * M_PI * sig_x * sig_y);
+  double exponent = ((x_obs - mu_x) * (x_obs - mu_x) / (2. * sig_x * sig_x))
+                  + ((y_obs - mu_y) * (y_obs - mu_y) / (2. * sig_y * sig_y));
+
+  return gauss_norm * exp(-exponent);
 }

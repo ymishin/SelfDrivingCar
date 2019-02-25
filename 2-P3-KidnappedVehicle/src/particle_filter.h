@@ -1,37 +1,53 @@
-/**
- * particle_filter.h
- * 2D particle filter class.
- *
- * Created on: Dec 12, 2016
- * Author: Tiffany Huang
- */
-
 #ifndef PARTICLE_FILTER_H_
 #define PARTICLE_FILTER_H_
 
 #include <string>
 #include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <numeric>
+#include <random>
 #include "helper_functions.h"
 
+using std::string;
+using std::vector;
+
 struct Particle {
-  int id;
-  double x;
-  double y;
-  double theta;
-  double weight;
-  std::vector<int> associations;
-  std::vector<double> sense_x;
-  std::vector<double> sense_y;
+
+  Particle() {}
+ 
+  Particle(int id, double x, double y, double theta) : 
+      id_(id),
+      x_(x), 
+      y_(y),
+      theta_(theta),
+      weight_(0),
+      associations_(std::vector<int>()),
+      sense_x_(std::vector<double>()),
+      sense_y_(std::vector<double>()) {}
+  
+  ~Particle() {}
+
+  int id_;
+  double x_;
+  double y_;
+  double theta_;
+  double weight_;
+  std::vector<int> associations_;
+  std::vector<double> sense_x_;
+  std::vector<double> sense_y_;
 };
 
 
 class ParticleFilter {  
  public:
-  // Constructor
-  // @param num_particles Number of particles
-  ParticleFilter() : num_particles(0), is_initialized(false) {}
 
-  // Destructor
+  ParticleFilter() : 
+      num_particles_(0), 
+      is_initialized_(false) {}
+
   ~ParticleFilter() {}
 
   /**
@@ -99,8 +115,13 @@ class ParticleFilter {
    * initialized Returns whether particle filter is initialized yet or not.
    */
   const bool initialized() const {
-    return is_initialized;
+    return is_initialized_;
   }
+
+  /**
+   * Multivariate Gaussian probability
+   */
+  double MultivProb(double sig_x, double sig_y, double x_obs, double y_obs, double mu_x, double mu_y);
 
   /**
    * Used for obtaining debugging information related to particles.
@@ -109,17 +130,17 @@ class ParticleFilter {
   std::string getSenseCoord(Particle best, std::string coord);
 
   // Set of current particles
-  std::vector<Particle> particles;
+  std::vector<Particle> particles_;
 
  private:
   // Number of particles to draw
-  int num_particles; 
+  int num_particles_;
   
   // Flag, if filter is initialized
-  bool is_initialized;
+  bool is_initialized_;
   
   // Vector of weights of all particles
-  std::vector<double> weights; 
+  std::vector<double> weights_;
 };
 
 #endif  // PARTICLE_FILTER_H_
