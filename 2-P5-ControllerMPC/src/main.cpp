@@ -24,7 +24,7 @@ double rad2deg(double x) { return x * 180 / pi(); }
 int main() {
   uWS::Hub h;
 
-  // MPC is initialized here!
+  // MPC is initialized here
   MPC mpc;
 
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
@@ -48,12 +48,24 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
+          // Fit a polynomial to the waypoints
+          Eigen::Map<Eigen::VectorXd> ptsx1(ptsx.data(), ptsx.size());
+          Eigen::Map<Eigen::VectorXd> ptsy1(ptsy.data(), ptsy.size());
+          VectorXd coeffs = polyfit(ptsx1, ptsy1, 3);
+          
+          // Cross track and heading errors
+          double cte = polyeval(coeffs, px) - py;
+          double epsi = psi - atan(coeffs[1]);
+
           /**
            * TODO: Calculate steering angle and throttle using MPC.
            * Both are in between [-1, 1].
            */
-          double steer_value;
-          double throttle_value;
+          auto state = std::vector<double>({ px, py, psi, v, cte, epsi });
+          Eigen::Map<Eigen::VectorXd> state1(state.data(), state.size());
+          auto control_vals = mpc.Solve(state1, coeffs);
+          double steer_value = control_vals[0] / deg2rad(25);
+          double throttle_value = control_vals[1];
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the 
