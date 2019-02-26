@@ -48,23 +48,33 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
+          // Transform waypoints to vehicle's coordinate system
+          for (unsigned i = 0; i < ptsx.size(); ++i) {
+            double shift_x = ptsx[i] - px;
+            double shift_y = ptsy[i] - py;
+            ptsx[i] = shift_x * cos(-psi) - shift_y * sin(-psi);
+            ptsy[i] = shift_x * sin(-psi) + shift_y * cos(-psi);
+          }
+
           // Fit a polynomial to the waypoints
           Eigen::Map<Eigen::VectorXd> ptsx1(ptsx.data(), ptsx.size());
           Eigen::Map<Eigen::VectorXd> ptsy1(ptsy.data(), ptsy.size());
           VectorXd coeffs = polyfit(ptsx1, ptsy1, 3);
           
           // Cross track and heading errors
-          double cte = polyeval(coeffs, px) - py;
-          double epsi = psi - atan(coeffs[1]);
+          //double cte = polyeval(coeffs, px);
+          //double epsi = psi - atan(coeffs[1] + 2 * coeffs[2] * px + 3 * coeffs[3] * pow(px, 2));
+          double cte = polyeval(coeffs, 0.);
+          double epsi = -atan(coeffs[1]);
 
           /**
            * TODO: Calculate steering angle and throttle using MPC.
            * Both are in between [-1, 1].
            */
-          auto state = std::vector<double>({ px, py, psi, v, cte, epsi });
-          Eigen::Map<Eigen::VectorXd> state1(state.data(), state.size());
-          auto control_vals = mpc.Solve(state1, coeffs);
-          double steer_value = control_vals[0] / deg2rad(25);
+          VectorXd state(6);
+          state << 0., 0., 0., v, cte, epsi;
+          auto control_vals = mpc.Solve(state, coeffs);
+          double steer_value = control_vals[0] / deg2rad(25.) / 2.67;
           double throttle_value = control_vals[1];
 
           json msgJson;
@@ -88,8 +98,15 @@ int main() {
           msgJson["mpc_y"] = mpc_y_vals;
 
           // Display the waypoints/reference line
-          vector<double> next_x_vals = ptsx;
-          vector<double> next_y_vals = ptsy;
+          vector<double> next_x_vals;
+          vector<double> next_y_vals;
+
+          double poly_inc = 2.5;
+          int num_points = 25;
+          for (unsigned i = 1; i < num_points; ++i) {
+            next_x_vals.push_back(poly_inc * i);
+            next_y_vals.push_back(polyeval(coeffs, poly_inc * i));
+          }
 
           /**
            * TODO: add (x,y) points to list here, points are in reference to 
@@ -111,7 +128,7 @@ int main() {
           //   around the track with 100ms latency.
           //
           // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE SUBMITTING.
-          std::this_thread::sleep_for(std::chrono::milliseconds(100));
+          std::this_thread::sleep_for(std::chrono::milliseconds(0));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {

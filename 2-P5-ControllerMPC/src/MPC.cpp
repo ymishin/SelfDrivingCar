@@ -3,8 +3,8 @@
 /**
  * TODO: Set the timestep length and duration
  */
-size_t N = 50;
-double dt = 0.05;
+size_t N = 10;
+double dt = 0.1;
 
 // This value was obtained by measuring the radius formed by running the vehicle in the
 //   simulator around in a circle with a constant steering angle and velocity on
@@ -62,20 +62,20 @@ public:
 
     // Cross track error, heading error, velocity to reference error
     for (unsigned t = 0; t < N; t++) {
-      fg[0] += CppAD::pow(vars[cte_start_ + t], 2);
-      fg[0] += CppAD::pow(vars[epsi_start_ + t], 2);
-      //fg[0] += CppAD::pow(vars[v_start_ + t] - ref_v, 2);
+      fg[0] += 2.e+3 * CppAD::pow(vars[cte_start_ + t], 2);
+      fg[0] += 2.e+3 *CppAD::pow(vars[epsi_start_ + t], 2);
+      fg[0] += CppAD::pow(vars[v_start_ + t] - ref_v, 2);
     }
     // Minimize the use of actuators
     for (unsigned t = 0; t < N - 1; t++) {
 
-      fg[0] += CppAD::pow(vars[delta_start_ + t], 2);
-      fg[0] += CppAD::pow(vars[a_start_ + t], 2);
+      fg[0] += 5 * CppAD::pow(vars[delta_start_ + t], 2);
+      fg[0] += 5 * CppAD::pow(vars[a_start_ + t], 2);
     }
     // Minimize the value gap between sequential actuations
     for (unsigned t = 0; t < N - 2; t++) {
-      fg[0] += CppAD::pow(vars[delta_start_ + t + 1] - vars[delta_start_ + t], 2);
-      fg[0] += CppAD::pow(vars[a_start_ + t + 1] - vars[a_start_ + t], 2);
+      fg[0] += 2.e2 * CppAD::pow(vars[delta_start_ + t + 1] - vars[delta_start_ + t], 2);
+      fg[0] += 1.e1 * CppAD::pow(vars[a_start_ + t + 1] - vars[a_start_ + t], 2);
     }
 
     fg[1 + x_start_] = vars[x_start_];
@@ -106,19 +106,9 @@ public:
       AD<double> delta0 = vars[delta_start_ + t - 1];
       AD<double> a0 = vars[a_start_ + t - 1];
 
-      AD<double> f0 = coeffs_[0] + coeffs_[1] * x0;
-      AD<double> psides0 = CppAD::atan(coeffs_[1]);
+      AD<double> f0 = coeffs_[0] + coeffs_[1] * x0 + coeffs_[2] * x0 * x0 + coeffs_[3] * x0 * x0 * x0;
+      AD<double> psides0 = CppAD::atan(coeffs_[1] + 2 * coeffs_[2] * x0 + 3 * coeffs_[3] * x0 * x0);
 
-      // Here's `x` to get you started.
-      // The idea here is to constraint this value to be 0.
-      //
-      // Recall the equations for the model:
-      // x_[t] = x[t-1] + v[t-1] * cos(psi[t-1]) * dt
-      // y_[t] = y[t-1] + v[t-1] * sin(psi[t-1]) * dt
-      // psi_[t] = psi[t-1] + v[t-1] / Lf * delta[t-1] * dt
-      // v_[t] = v[t-1] + a[t-1] * dt
-      // cte[t] = f(x[t-1]) - y[t-1] + v[t-1] * sin(epsi[t-1]) * dt
-      // epsi[t] = psi[t] - psides[t-1] + v[t-1] * delta[t-1] / Lf * dt
       fg[1 + x_start_ + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
       fg[1 + y_start_ + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
       fg[1 + psi_start_ + t] = psi1 - (psi0 + v0 * delta0 / Lf * dt);
@@ -217,18 +207,18 @@ std::vector<double> MPC::Solve(const VectorXd &state, const VectorXd &coeffs) {
     constraints_lowerbound[i] = 0.;
     constraints_upperbound[i] = 0.;
   }
-  constraints_lowerbound[x_start] = vars[x_start];
-  constraints_upperbound[x_start] = vars[x_start];
-  constraints_lowerbound[y_start] = vars[y_start];
-  constraints_upperbound[y_start] = vars[y_start];
-  constraints_lowerbound[psi_start] = vars[psi_start];
-  constraints_upperbound[psi_start] = vars[psi_start];
-  constraints_lowerbound[v_start] = vars[v_start];
-  constraints_upperbound[v_start] = vars[v_start];
-  constraints_lowerbound[cte_start] = vars[cte_start];
-  constraints_upperbound[cte_start] = vars[cte_start];
-  constraints_lowerbound[epsi_start] = vars[epsi_start];
-  constraints_upperbound[epsi_start] = vars[epsi_start];
+  constraints_lowerbound[x_start] = state(0);
+  constraints_upperbound[x_start] = state(0);
+  constraints_lowerbound[y_start] = state(1);
+  constraints_upperbound[y_start] = state(1);
+  constraints_lowerbound[psi_start] = state(2);
+  constraints_upperbound[psi_start] = state(2);
+  constraints_lowerbound[v_start] = state(3);
+  constraints_upperbound[v_start] = state(3);
+  constraints_lowerbound[cte_start] = state(4);
+  constraints_upperbound[cte_start] = state(4);
+  constraints_lowerbound[epsi_start] = state(5);
+  constraints_upperbound[epsi_start] = state(5);
 
   // object that computes objective and constraints
   FG_eval fg_eval(
