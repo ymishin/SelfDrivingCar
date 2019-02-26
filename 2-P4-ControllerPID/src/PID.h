@@ -31,20 +31,25 @@ class PID {
    */
   double TotalError();
 
+  double CalculateSteer(double cte);
+
  private:
+
+  bool first_measurement_done;
+
   /**
    * PID Errors
    */
-  double p_error;
-  double i_error;
-  double d_error;
+  double p_error_;
+  double i_error_;
+  double d_error_;
 
   /**
    * PID Coefficients
    */ 
-  double Kp;
-  double Ki;
-  double Kd;
+  double Kp_;
+  double Ki_;
+  double Kd_;
 };
 
 #endif  // PID_H
