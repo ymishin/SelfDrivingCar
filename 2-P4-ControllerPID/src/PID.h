@@ -20,18 +20,10 @@ class PID {
   void Init(double Kp_, double Ki_, double Kd_);
 
   /**
-   * Update the PID error variables given cross track error.
-   * @param cte The current cross track error
-   */
-  void UpdateError(double cte);
-
-  /**
    * Calculate the total PID error.
    * @output The total PID error
    */
-  double TotalError();
-
-  double CalculateSteer(double cte);
+  double TotalError(double cte);
 
  private:
 
