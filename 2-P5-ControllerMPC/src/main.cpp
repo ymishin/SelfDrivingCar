@@ -74,7 +74,7 @@ int main() {
           VectorXd state(6);
           state << 0., 0., 0., v, cte, epsi;
           auto control_vals = mpc.Solve(state, coeffs);
-          double steer_value = control_vals[0] / deg2rad(25.) / 2.67;
+          double steer_value = control_vals[0] / deg2rad(25.);
           double throttle_value = control_vals[1];
 
           json msgJson;

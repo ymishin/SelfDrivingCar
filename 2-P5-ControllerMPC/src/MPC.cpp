@@ -111,12 +111,10 @@ public:
 
       fg[1 + x_start_ + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
       fg[1 + y_start_ + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
-      fg[1 + psi_start_ + t] = psi1 - (psi0 + v0 * delta0 / Lf * dt);
+      fg[1 + psi_start_ + t] = psi1 - (psi0 - v0 * delta0 / Lf * dt);
       fg[1 + v_start_ + t] = v1 - (v0 + a0 * dt);
-      fg[1 + cte_start_ + t] =
-        cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
-      fg[1 + epsi_start_ + t] =
-        epsi1 - ((psi0 - psides0) + v0 * delta0 / Lf * dt);
+      fg[1 + cte_start_ + t] = cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
+      fg[1 + epsi_start_ + t] = epsi1 - ((psi0 - psides0) - v0 * delta0 / Lf * dt);
     }
   }
 
