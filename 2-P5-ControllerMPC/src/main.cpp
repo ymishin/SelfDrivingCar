@@ -88,8 +88,8 @@ int main() {
           msgJson["mpc_y"] = mpc_y_vals;
 
           // Display the waypoints/reference line
-          vector<double> next_x_vals;
-          vector<double> next_y_vals;
+          vector<double> next_x_vals = ptsx;
+          vector<double> next_y_vals = ptsy;
 
           /**
            * TODO: add (x,y) points to list here, points are in reference to 

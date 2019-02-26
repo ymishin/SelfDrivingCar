@@ -52,7 +52,7 @@ public:
      *   the Solver function below.
      */
 
-    double ref_v;
+    double ref_v = 35;
 
     fg[0] = 0;
 
@@ -64,7 +64,7 @@ public:
     for (unsigned t = 0; t < N; t++) {
       fg[0] += CppAD::pow(vars[cte_start_ + t], 2);
       fg[0] += CppAD::pow(vars[epsi_start_ + t], 2);
-      fg[0] += CppAD::pow(vars[v_start_ + t] - ref_v, 2);
+      //fg[0] += CppAD::pow(vars[v_start_ + t] - ref_v, 2);
     }
     // Minimize the use of actuators
     for (unsigned t = 0; t < N - 1; t++) {
@@ -78,12 +78,56 @@ public:
       fg[0] += CppAD::pow(vars[a_start_ + t + 1] - vars[a_start_ + t], 2);
     }
 
-    //fg[1 + x_start] = vars[x_start];
-    //fg[1 + y_start] = vars[y_start];
-    //fg[1 + psi_start] = vars[psi_start];
-    //fg[1 + v_start] = vars[v_start];
-    //fg[1 + cte_start] = vars[cte_start];
-    //fg[1 + epsi_start] = vars[epsi_start];
+    fg[1 + x_start_] = vars[x_start_];
+    fg[1 + y_start_] = vars[y_start_];
+    fg[1 + psi_start_] = vars[psi_start_];
+    fg[1 + v_start_] = vars[v_start_];
+    fg[1 + cte_start_] = vars[cte_start_];
+    fg[1 + epsi_start_] = vars[epsi_start_];
+
+    for (unsigned t = 1; t < N; ++t) {
+      // The state at time t+1 .
+      AD<double> x1 = vars[x_start_ + t];
+      AD<double> y1 = vars[y_start_ + t];
+      AD<double> psi1 = vars[psi_start_ + t];
+      AD<double> v1 = vars[v_start_ + t];
+      AD<double> cte1 = vars[cte_start_ + t];
+      AD<double> epsi1 = vars[epsi_start_ + t];
+
+      // The state at time t.
+      AD<double> x0 = vars[x_start_ + t - 1];
+      AD<double> y0 = vars[y_start_ + t - 1];
+      AD<double> psi0 = vars[psi_start_ + t - 1];
+      AD<double> v0 = vars[v_start_ + t - 1];
+      AD<double> cte0 = vars[cte_start_ + t - 1];
+      AD<double> epsi0 = vars[epsi_start_ + t - 1];
+
+      // Only consider the actuation at time t.
+      AD<double> delta0 = vars[delta_start_ + t - 1];
+      AD<double> a0 = vars[a_start_ + t - 1];
+
+      AD<double> f0 = coeffs_[0] + coeffs_[1] * x0;
+      AD<double> psides0 = CppAD::atan(coeffs_[1]);
+
+      // Here's `x` to get you started.
+      // The idea here is to constraint this value to be 0.
+      //
+      // Recall the equations for the model:
+      // x_[t] = x[t-1] + v[t-1] * cos(psi[t-1]) * dt
+      // y_[t] = y[t-1] + v[t-1] * sin(psi[t-1]) * dt
+      // psi_[t] = psi[t-1] + v[t-1] / Lf * delta[t-1] * dt
+      // v_[t] = v[t-1] + a[t-1] * dt
+      // cte[t] = f(x[t-1]) - y[t-1] + v[t-1] * sin(epsi[t-1]) * dt
+      // epsi[t] = psi[t] - psides[t-1] + v[t-1] * delta[t-1] / Lf * dt
+      fg[1 + x_start_ + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
+      fg[1 + y_start_ + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
+      fg[1 + psi_start_ + t] = psi1 - (psi0 + v0 * delta0 / Lf * dt);
+      fg[1 + v_start_ + t] = v1 - (v0 + a0 * dt);
+      fg[1 + cte_start_ + t] =
+        cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
+      fg[1 + epsi_start_ + t] =
+        epsi1 - ((psi0 - psides0) + v0 * delta0 / Lf * dt);
+    }
   }
 
 private:
@@ -116,6 +160,12 @@ std::vector<double> MPC::Solve(const VectorXd &state, const VectorXd &coeffs) {
    *   4 * 10 + 2 * 9
    */
   size_t n_vars = 6 * N + 2 * (N - 1);
+  
+  /**
+   * TODO: Set the number of constraints
+   */
+  size_t n_constraints = 6 * N;
+
   unsigned x_start = 0;
   unsigned y_start = x_start + N;
   unsigned psi_start = y_start + N;
@@ -124,11 +174,6 @@ std::vector<double> MPC::Solve(const VectorXd &state, const VectorXd &coeffs) {
   unsigned epsi_start = cte_start + N;
   unsigned delta_start = epsi_start + N;
   unsigned a_start = delta_start + N - 1;
-  
-  /**
-   * TODO: Set the number of constraints
-   */
-  size_t n_constraints = 6 * (N - 1);
 
   // Initial value of the independent variables.
   // SHOULD BE 0 besides initial state.
@@ -172,6 +217,18 @@ std::vector<double> MPC::Solve(const VectorXd &state, const VectorXd &coeffs) {
     constraints_lowerbound[i] = 0.;
     constraints_upperbound[i] = 0.;
   }
+  constraints_lowerbound[x_start] = vars[x_start];
+  constraints_upperbound[x_start] = vars[x_start];
+  constraints_lowerbound[y_start] = vars[y_start];
+  constraints_upperbound[y_start] = vars[y_start];
+  constraints_lowerbound[psi_start] = vars[psi_start];
+  constraints_upperbound[psi_start] = vars[psi_start];
+  constraints_lowerbound[v_start] = vars[v_start];
+  constraints_upperbound[v_start] = vars[v_start];
+  constraints_lowerbound[cte_start] = vars[cte_start];
+  constraints_upperbound[cte_start] = vars[cte_start];
+  constraints_lowerbound[epsi_start] = vars[epsi_start];
+  constraints_upperbound[epsi_start] = vars[epsi_start];
 
   // object that computes objective and constraints
   FG_eval fg_eval(
