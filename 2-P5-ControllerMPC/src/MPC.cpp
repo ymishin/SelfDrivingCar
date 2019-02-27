@@ -181,7 +181,7 @@ std::vector<double> MPC::Solve(const VectorXd &state, const VectorXd &coeffs) {
    */
   Dvector vars_lowerbound(n_vars);
   Dvector vars_upperbound(n_vars);
-  // ...
+  // default limits for all variables
   for (unsigned i = 0; i < delta_start; ++i) {
     vars_lowerbound[i] = std::numeric_limits<double>::lowest();
     vars_upperbound[i] = std::numeric_limits<double>::max();
@@ -244,18 +244,18 @@ std::vector<double> MPC::Solve(const VectorXd &state, const VectorXd &coeffs) {
   // Change this as you see fit.
   options += "Numeric max_cpu_time          0.5\n";
 
-  CppAD::ipopt::solve_result<Dvector> solution_;
+  CppAD::ipopt::solve_result<Dvector> solution;
 
   // solve the problem
   CppAD::ipopt::solve<Dvector, FG_eval>(
       options, vars, vars_lowerbound, vars_upperbound, constraints_lowerbound,
-      constraints_upperbound, fg_eval, solution_);
+      constraints_upperbound, fg_eval, solution);
 
   // Check some of the solution values
-  ok &= solution_.status == CppAD::ipopt::solve_result<Dvector>::success;
+  ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
   // Cost
-  auto cost = solution_.obj_value;
+  auto cost = solution.obj_value;
   std::cout << "Cost " << cost << std::endl;
 
   /**
@@ -265,7 +265,17 @@ std::vector<double> MPC::Solve(const VectorXd &state, const VectorXd &coeffs) {
    * {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
    *   creates a 2 element double vector.
    */
+  
+  std::vector<double> result;
 
-  // Return the first actuator values
-  return { solution_.x[delta_start], solution_.x[a_start] };
+  // Actuator values
+  result.push_back((solution.x[delta_start] + solution.x[delta_start + 1] + solution.x[delta_start + 2]) / 3.);
+  result.push_back((solution.x[a_start] + solution.x[a_start + 1] + solution.x[a_start + 2]) / 3.);
+
+  for (unsigned i = 0; i < N - 1; ++i) {
+    result.push_back(solution.x[x_start + i + 1]);
+    result.push_back(solution.x[y_start + i + 1]);
+  }
+
+  return result;
 }

@@ -73,9 +73,9 @@ int main() {
            */
           VectorXd state(6);
           state << 0., 0., 0., v, cte, epsi;
-          auto control_vals = mpc.Solve(state, coeffs);
-          double steer_value = control_vals[0] / deg2rad(25.);
-          double throttle_value = control_vals[1];
+          auto result = mpc.Solve(state, coeffs);
+          double steer_value = result[0] / deg2rad(25.);
+          double throttle_value = result[1];
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the 
@@ -87,6 +87,12 @@ int main() {
           // Display the MPC predicted trajectory 
           vector<double> mpc_x_vals;
           vector<double> mpc_y_vals;
+
+
+          for (unsigned i = 2; i < result.size(); i += 2) {
+            mpc_x_vals.push_back(result[i]);
+            mpc_y_vals.push_back(result[i + 1]);
+          }
 
           /**
            * TODO: add (x,y) points to list here, points are in reference to 
@@ -128,7 +134,7 @@ int main() {
           //   around the track with 100ms latency.
           //
           // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE SUBMITTING.
-          std::this_thread::sleep_for(std::chrono::milliseconds(0));
+          std::this_thread::sleep_for(std::chrono::milliseconds(100));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {
