@@ -10,24 +10,17 @@
 
 using CppAD::AD;
 using Eigen::VectorXd;
-//typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
-
-//typedef CPPAD_TESTVECTOR(double) Dvector;
 
 class MPC {
 public:
   
-   MPC();
+  MPC() {}
 
-   virtual ~MPC();
+  virtual ~MPC() {}
 
-   // Solve the model given an initial state and polynomial coefficients.
-   // Return the first actuations.
-   std::vector<double> Solve(const Eigen::VectorXd &state, 
-                             const Eigen::VectorXd &coeffs);
-
-   // place to return solution
-   //CppAD::ipopt::solve_result<CPPAD_TESTVECTOR(double)> solution_;
+  // Solve the model given an initial state and polynomial coefficients.
+  std::vector<double> Solve(const Eigen::VectorXd &state, 
+                            const Eigen::VectorXd &coeffs);
 };
 
 #endif  // MPC_H
