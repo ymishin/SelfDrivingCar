@@ -8,15 +8,15 @@
 
 #### PID Controller Implementation
 
-The classic PID controller is implemented. The steering value `&alpha;` is calculated as:
+The classic PID controller is implemented. The steering value **&alpha;** is calculated as:
 
-`&alpha; = -&tau;<sub>p</sub>&sdot;CTE -&tau;<sub>d</sub>&sdot;dCTE/dt -&tau;<sub>i</sub>&sdot;&sum;CTE`
+**&alpha; = -&tau;<sub>p</sub>&sdot;CTE -&tau;<sub>d</sub>&sdot;dCTE/dt -&tau;<sub>i</sub>&sdot;&sum;CTE**
 
-where `CTE` is cross track error and `&tau;<sub>p</sub>`, `&tau;<sub>d</sub>` and `&tau;<sub>i</sub>` are hyperparameters controlling contributions of proportional, derivative and integral error terms respectively.
+where **CTE** is cross track error and **&tau;<sub>p</sub>**, **&tau;<sub>d</sub>** and **&tau;<sub>i</sub>** are hyperparameters controlling contributions of proportional, derivative and integral error terms respectively.
 
 #### Hyperparameters Tuning
 
-Optimal values for hypeparameters `&tau;<sub>p</sub>`, `&tau;<sub>d</sub>` and `&tau;<sub>i</sub>` can be found using some optimization algorithm like Twiddle. However, in this project manual tuning was sufficient. After some experiments, the values for hyperparameters were choosen as:
+Optimal values for hypeparameters **&tau;<sub>p</sub>**, **&tau;<sub>d</sub>** and **&tau;<sub>i</sub>** can be found using some optimization algorithm like Twiddle. However, in this project manual tuning was sufficient. After some experiments, the values for hyperparameters were choosen as:
 
 | Parameter             |     Value	    | 
 |:----------------------|:--------------| 
