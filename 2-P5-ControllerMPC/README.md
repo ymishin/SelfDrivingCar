@@ -24,7 +24,7 @@ Model update equations are formulated as:
 
 **&psi;<sub>t+1</sub> = &psi;<sub>t</sub> + (v<sub>t</sub>/L<sub>f</sub>)&sdot;&delta;<sub>t</sub>&sdot;dt**
 
-**v<sub>t+1</sub> = v<sub>t</sub> + a<sub>t</sub>&sdot;&sdot;dt**
+**v<sub>t+1</sub> = v<sub>t</sub> + a<sub>t</sub>&sdot;dt**
 
 **cte<sub>t+1</sub> = f(x<sub>t</sub>) - y<sub>t</sub> + v<sub>t</sub>&sdot;sin(e&psi;<sub>t</sub>)&sdot;dt**
 
@@ -60,4 +60,4 @@ These choosen values provide good balance between accuracy and performance.
 
 #### Latency
 
-The MPC contoller predicts actuators values for elapsed duration **N**. To deal with latency, the actuators values to be used by a vehicle were calculated as arithmetic averages of the first **n** predicted timesteps. After some experiments, **n** has been choosen to be **3**.
+The MPC contoller predicts actuators values for elapsed duration **N**. To deal with latency, the actuators values to be used by a vehicle were calculated as arithmetic averages of the first **n** predicted timesteps. After some experiments, **n** had been choosen to be **3**.
