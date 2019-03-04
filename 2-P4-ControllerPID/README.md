@@ -1,27 +1,25 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+# **PID Controller**
 
 ---
 
-PID Controller Implementation
-
-
-The basic PID controller is implemented. The steering value is calculated as:
-
-...
-Kp, Kd and Ki are hyperparameters controlling .. ... ... respectively.
-
-error_p, error_d and error_i are error terms calculated as:
-
-error_p
-error_d
-error_i
+**The goal of this project is to implement a PID controller to control a vehicle**
 
 ---
 
-Hyperparameters Tuning
+#### PID Controller Implementation
 
-Optimal hypeparameters can be found using some optimization algorithm like Twiddle. However, in this project manual tuning was sufficient. After some experiments the values for Kp, Kd and Ki were choose as:
-1 2 3
+The classic PID controller is implemented. The steering value `&alpha;` is calculated as:
 
----
+`&alpha; = -&tau;<sub>p</sub>&sdot;CTE -&tau;<sub>d</sub>&sdot;dCTE/dt -&tau;<sub>i</sub>&sdot;&sum;CTE`
+
+where `CTE` is cross track error and `&tau;<sub>p</sub>`, `&tau;<sub>d</sub>` and `&tau;<sub>i</sub>` are hyperparameters controlling contributions of proportional, derivative and integral error terms respectively.
+
+#### Hyperparameters Tuning
+
+Optimal values for hypeparameters `&tau;<sub>p</sub>`, `&tau;<sub>d</sub>` and `&tau;<sub>i</sub>` can be found using some optimization algorithm like Twiddle. However, in this project manual tuning was sufficient. After some experiments, the values for hyperparameters were choosen as:
+
+| Parameter             |     Value	    | 
+|:----------------------|:--------------| 
+| &tau;<sub>p</sub>  		| 0.2   				| 
+| &tau;<sub>d</sub>  		| 3.5   				| 
+| &tau;<sub>i</sub>  		| 5e-4  				|
