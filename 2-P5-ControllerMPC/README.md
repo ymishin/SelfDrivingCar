@@ -14,7 +14,7 @@ Vehicle state is defined as:
 
 Actuators to be predicted are:
 
-steering angle **&delta** and throttle/brake **a**
+steering angle **&delta;** and throttle/brake **a**
 
 Model update equations are formulated as:
 
@@ -36,12 +36,12 @@ Parameters descriptions follow:
 |:----------------------|:--------------| 
 | **x** and **y**   		 |  Vehicle coordinates 				| 
 | **v** | Vehicle velocity    				| 
-| **&psi;** |     				| 
+| **&psi;** | Vehicle orientation 				| 
 | **dt** | Timestep     				| 
 | **cte** | Cross track error    				| 
-| **e&psi;** |     				| 
-| **&psi;des** |     				| 
-| **L<sub>f</sub>** | Distance between vehicle front and its center of gravity |
+| **e&psi;** | Orientation error    				| 
+| **&psi;des** | Desired orientation    				| 
+| **L<sub>f</sub>** | Distance between front axle and center of mass |
 
 #### Preprocessing
 
